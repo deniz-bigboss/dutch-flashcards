@@ -2513,7 +2513,13 @@ const ACCOUNTS = [
   {user: "deniz", display: "Deniz", deck: "nl",
    sha: "c5b6f604c41c22328fbfaa2f2af369682622e3446548730c3cb591bf8514bcb0",
    djb: 4238835318},
-  {user: "aruna", display: "Aruna", deck: "it", claim: true}
+  {user: "aruna", display: "Aruna", deck: "it", claim: true, dog: true},
+  /* TEMP test account (password: the obvious one) so Deniz can preview the
+     Italian experience without claiming Aruna's profile. Remove this entry
+     (and any localStorage keys starting with woordjes.yes.) when done. */
+  {user: "yes", display: "Yes (test)", deck: "it", dog: true,
+   sha: "313d6d3f273af34d2973a895525f5a080bae65a98dddb47f171fa33b511bc05c",
+   djb: 3772709521}
 ];
 const SESSION_KEY = "woordjes.session";
 const CLAIM_KEY = "woordjes.claim.aruna";
@@ -2545,7 +2551,7 @@ function setUser(acc){
   buildCards();
   document.body.classList.toggle("theme-it", acc.deck === "it");
   document.body.classList.toggle("theme-nl", acc.deck !== "it");
-  document.body.classList.toggle("user-aruna", acc.user === "aruna");
+  document.body.classList.toggle("user-aruna", !!acc.dog);
   LSK = {
     progress: "woordjes." + acc.user + ".progress",
     custom:   "woordjes." + acc.user + ".custom",
