@@ -1,25 +1,30 @@
-# 🧀 Woordjes — Dutch flashcards
+# 🐾 The Aru App — Dutch & Italian flashcards
 
-A personal flashcard website for learning the **1000 most common Dutch words**
-you'll meet as an incoming uni student in the Netherlands. One single HTML
-file — no dependencies, no build step, works offline once loaded.
+A personal flashcard website for two people: **Deniz** learns the **1000 most
+common Dutch words**, and **Aruna** learns the **1000 most common Italian
+words** — each with the same spaced-repetition engine. One single HTML file —
+no dependencies, no build step, works offline once loaded.
 
 **Live app:** https://deniz-bigboss.github.io/dutch-flashcards/
 
 ## Features
 
-- **1000 words, grouped 200 × 5:**
+- **Two built-in decks, 1000 words each, grouped 200 × 5:**
   - Level 1 — Survival basics (greetings, pronouns, numbers, core verbs)
   - Level 2 — Daily life (food, home, transport, shopping, weather)
   - Level 3 — People & conversation (family, emotions, health, free time)
-  - Level 4 — Student life (uni, housing, banking, BSN/DigiD, side jobs, tech)
-  - Level 5 — Society & fluency (news, abstract words, connectors, Dutch-isms)
-- Every word shown **in context**: a Dutch example sentence (word highlighted)
+  - Level 4 — Student life (uni, housing, banking, bureaucracy, jobs, tech)
+  - Level 5 — Society & fluency (news, abstract words, connectors, idioms)
+- Deniz sees the Dutch deck 🇳🇱, Aruna sees the Italian deck 🇮🇹 — same
+  structure, same daily rhythm, different language
+- Every word shown **in context**: an example sentence (word highlighted)
   with its English translation on the back
 - **Spaced repetition tuned for ~200 cards/day** (see below)
-- Dark mode, NL→EN and EN→NL, Dutch text-to-speech, daily streak
-- Login screen with per-user progress tracking
-- Add your own words, search the full list, export/import backups
+- Modern dark glass UI with a per-language accent color
+- Text-to-speech in the right language (Dutch for Deniz, Italian for Aruna)
+- **Pıtırcık** 🐶 — Aruna's fluffy white maltese-pumi lives in the corner of
+  her screen; click or tap him for pets, wiggles, hearts and happy barks
+- Add your own words, search the full list, export/import backups, daily streak
 
 ## The learning schedule
 
@@ -31,18 +36,29 @@ file — no dependencies, no build step, works offline once loaded.
   "Keep practicing" rounds top lighter days up by re-drilling your weakest cards
 - Tunable in `index.html`: `DAILY_NEW`, `DAILY_GOAL`, `INTERVAL_DAYS`
 
-## Login & your data
+## Who can log in
 
-- The login screen is a **client-side gate** on a static site: it keeps each
-  user's progress in their own browser storage, but it is **not real
-  security** — never reuse a password you use anywhere else.
+Only two names exist:
+
+- **Deniz** — password fixed in the app (stored as a salted hash).
+- **Aruna** — the profile is **claimed on first login**: the first person to
+  enter the name Aruna chooses the password right there, and from then on the
+  profile belongs to them on that device. Nobody else can get in.
+
+The login screen is a **client-side gate** on a static site: it keeps each
+user's progress under their own browser storage, but it is **not real
+security** — never reuse a password you use anywhere else.
+
+## Your data
+
 - Progress lives in the browser's localStorage, **per device**. To move
   progress between phone and laptop, use **Export backup / Import backup**
   in the footer.
-- The password is stored as a salted SHA-256 hash in `ACCOUNTS` in
-  `index.html` (`sha256("woordjes-v1:" + password)`).
+- Because the Aruna claim is also per device, on a new device she just logs
+  in with the same name + password again and imports her backup.
 
 ## Use it on your phone
 
 Open the live URL, log in, and use your browser's **"Add to Home Screen"** —
-it then opens full-screen like an app and works offline.
+it then opens full-screen like an app and works offline. (And yes, Pıtırcık
+loves finger taps just as much as mouse clicks.)

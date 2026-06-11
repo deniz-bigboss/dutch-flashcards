@@ -3,136 +3,293 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0e1116">
-<title>Woordjes · Dutch flashcards</title>
+<meta name="theme-color" content="#0b0d14">
+<title>The Aru App · language flashcards</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>'>
 <style>
-  :root{color-scheme:dark}
+  :root{
+    color-scheme:dark;
+    --bg:#0b0d14;
+    --card:rgba(255,255,255,.045);
+    --card2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+    --line2:rgba(255,255,255,.16);
+    --txt:#eef0f6;
+    --mut:#9aa3b8;
+    --dim:#6d7689;
+    /* brand (login screen / no user yet): violet → pink → amber */
+    --ac:#8b5cf6; --ac2:#ec4899; --hl:#c4b5fd;
+    --glow1:rgba(139,92,246,.16); --glow2:rgba(236,72,153,.12);
+  }
+  body.theme-nl{--ac:#f97316;--ac2:#fbbf24;--hl:#fdba74;--glow1:rgba(249,115,22,.14);--glow2:rgba(251,191,36,.10)}
+  body.theme-it{--ac:#22c55e;--ac2:#a3e635;--hl:#86efac;--glow1:rgba(34,197,94,.14);--glow2:rgba(163,230,53,.10)}
+
   *{box-sizing:border-box}
   body{
     margin:0;
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-    color:#e7e4de;
+    font-family:ui-rounded,"SF Pro Rounded",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--txt);
     -webkit-font-smoothing:antialiased;
-    background:
-      radial-gradient(1200px 500px at 80% -10%, rgba(249,115,22,.10) 0%, transparent 60%),
-      radial-gradient(900px 400px at -10% 110%, rgba(76,118,189,.12) 0%, transparent 55%),
-      #0e1116;
+    background:var(--bg);
     min-height:100vh;
+    overflow-x:hidden;
   }
-  .wrap{max-width:600px;margin:0 auto;padding:20px 16px 90px}
-  .top{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{font-size:34px}
-  h1{font-family:Georgia,"Times New Roman",serif;font-size:30px;margin:0;letter-spacing:.3px;color:#f3f0ea}
-  .brand p{margin:2px 0 0;color:#8b95a5;font-size:13px}
+  /* floating aurora blobs */
+  body::before,body::after{
+    content:"";position:fixed;z-index:-1;border-radius:50%;
+    filter:blur(70px);pointer-events:none;
+    transition:background .8s;
+  }
+  body::before{
+    width:520px;height:520px;top:-180px;right:-140px;
+    background:radial-gradient(circle,var(--glow1) 0%,transparent 70%);
+    animation:drift1 26s ease-in-out infinite alternate;
+  }
+  body::after{
+    width:460px;height:460px;bottom:-160px;left:-150px;
+    background:radial-gradient(circle,var(--glow2) 0%,transparent 70%);
+    animation:drift2 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,50px) scale(1.15)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,-40px) scale(1.1)}}
+
+  .wrap{max-width:600px;margin:0 auto;padding:20px 16px 110px}
+  .top{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .logo{font-size:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
+  h1{font-size:29px;margin:0;letter-spacing:-.02em;font-weight:800}
+  .gradname{
+    background:linear-gradient(92deg,var(--ac) 0%,var(--ac2) 55%,var(--ac) 110%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  .brand p{margin:3px 0 0;color:var(--mut);font-size:13px}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{background:#1a202b;border:1px solid #2a3342;border-radius:999px;padding:4px 11px;font-size:12.5px;color:#b6bfcc}
+  .chip{
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:4px 11px;font-size:12.5px;color:var(--mut);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
 
-  .tabs{display:flex;background:#141a23;border-radius:12px;padding:4px;gap:4px;margin-bottom:16px}
-  .tab{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:9px;font-size:14px;font-weight:600;color:#8b95a5;cursor:pointer}
-  .tab.on{background:#242c39;color:#f3f0ea;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .tabs{
+    display:flex;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:4px;gap:4px;margin-bottom:16px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+  .tab{flex:1;border:0;background:transparent;padding:10px 4px;border-radius:10px;font-size:14px;font-weight:700;color:var(--mut);cursor:pointer;font-family:inherit;transition:color .2s}
+  .tab.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#0b0d14;box-shadow:0 3px 12px rgba(0,0,0,.35)}
   .panel{display:none}
-  .panel.on{display:block}
+  .panel.on{display:block;animation:fadein .25s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  .box{background:#161c25;border:1px solid #242d3b;border-radius:18px;padding:20px;box-shadow:0 2px 14px rgba(0,0,0,.35)}
-  .box h2{margin:0 0 6px;font-size:19px;color:#f3f0ea}
-  .duemsg{color:#98a2b3;font-size:14px;margin:0 0 10px}
-  .duemsg b{color:#fb923c}
+  .box{
+    background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;
+    box-shadow:0 10px 34px rgba(0,0,0,.4);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  .box h2{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
+  .duemsg{color:var(--mut);font-size:14px;margin:0 0 12px}
+  .duemsg b{color:var(--hl)}
   .goalwrap{margin:4px 0 2px}
-  .goallabel{display:flex;justify-content:space-between;font-size:12.5px;color:#8b95a5;margin-bottom:5px}
-  .goallabel b{color:#e7e4de}
-  .bar{height:7px;background:#1a202b;border-radius:99px;overflow:hidden}
-  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f97316,#fbbf24);border-radius:99px;transition:width .3s}
+  .goallabel{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);margin-bottom:6px}
+  .goallabel b{color:var(--txt)}
+  .bar{height:8px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:99px;transition:width .35s ease}
   .bar.goaldone i{background:linear-gradient(90deg,#22c55e,#4ade80)}
-  .paceline{font-size:12px;color:#6b7686;margin:10px 0 0;line-height:1.5}
-  .optrow{display:flex;align-items:center;gap:12px;margin:14px 0}
-  .optrow>label:first-child{width:74px;font-size:13px;color:#8b95a5;flex-shrink:0}
-  .seg{display:flex;background:#10151d;border-radius:10px;padding:3px;gap:3px}
-  .seg button{border:0;background:transparent;padding:7px 12px;border-radius:8px;font-size:14px;cursor:pointer;color:#8b95a5;font-weight:600}
-  .seg button.on{background:#242c39;color:#f3f0ea;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .paceline{font-size:12px;color:var(--dim);margin:12px 0 0;line-height:1.55}
+  .optrow{display:flex;align-items:center;gap:12px;margin:15px 0}
+  .optrow>label:first-child{width:74px;font-size:13px;color:var(--mut);flex-shrink:0}
+  .seg{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px}
+  .seg button{border:0;background:transparent;padding:7px 13px;border-radius:8px;font-size:14px;cursor:pointer;color:var(--mut);font-weight:700;font-family:inherit;transition:color .2s}
+  .seg button.on{background:var(--card2);color:var(--txt);box-shadow:0 1px 4px rgba(0,0,0,.4)}
   .dchips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
-  .dchip{border:1px solid #2a3342;background:#1a202b;border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;color:#b6bfcc}
-  .dchip.on{background:#f97316;border-color:#f97316;color:#fff}
-  .chk{font-size:14px;color:#b6bfcc;display:flex;align-items:center;gap:8px;cursor:pointer}
-  .bigbtn{display:block;width:100%;border:0;background:#f97316;color:#fff;font-size:16px;font-weight:700;padding:14px;border-radius:13px;cursor:pointer;margin-top:14px;box-shadow:0 3px 14px rgba(249,115,22,.3)}
+  .dchip{border:1px solid var(--line2);background:var(--card);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;color:var(--mut);font-family:inherit;transition:all .18s}
+  .dchip:hover{border-color:var(--ac)}
+  .dchip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#0b0d14;font-weight:700}
+  .chk{font-size:14px;color:var(--mut);display:flex;align-items:center;gap:8px;cursor:pointer}
+  .bigbtn{
+    display:block;width:100%;border:0;
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    color:#0b0d14;font-size:16px;font-weight:800;padding:15px;border-radius:15px;
+    cursor:pointer;margin-top:14px;font-family:inherit;letter-spacing:.01em;
+    box-shadow:0 6px 22px color-mix(in srgb,var(--ac) 32%,transparent);
+    transition:transform .15s,box-shadow .15s;
+  }
+  .bigbtn:hover{transform:translateY(-1px);box-shadow:0 9px 26px color-mix(in srgb,var(--ac) 40%,transparent)}
   .bigbtn:active{transform:translateY(1px)}
 
   .sessionbar{margin-bottom:14px}
   .scene{perspective:1400px;height:min(430px,60vh);margin-bottom:14px}
+  .scene.deal{animation:dealin .3s ease}
+  @keyframes dealin{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
   .card3d{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.25,.8,.3,1);cursor:pointer}
   .card3d.flipped{transform:rotateY(180deg)}
   .card3d.notrans{transition:none}
   .face{
     position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-    background:#161c25;border:1px solid #242d3b;border-radius:20px;
-    box-shadow:0 8px 28px rgba(0,0,0,.45);padding:20px;
+    background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+    border:1px solid var(--line2);border-radius:24px;
+    box-shadow:0 14px 40px rgba(0,0,0,.5);padding:20px;
     display:flex;flex-direction:column;justify-content:space-between;overflow:auto;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   }
-  .face.back{transform:rotateY(180deg);background:#15202d;border-color:#27405a}
+  .face.back{transform:rotateY(180deg);background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 13%,transparent),rgba(255,255,255,.03))}
   .meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .cat{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#d4a95c}
+  .cat{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--hl)}
   .dots{display:inline-flex;gap:3px}
-  .dot{width:7px;height:7px;border-radius:50%;background:#2a3342;display:inline-block}
-  .dot.on{background:#f97316}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);display:inline-block}
+  .dot.on{background:var(--ac)}
   .main{text-align:center;padding:10px 4px}
-  .word{font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,7vw,40px);line-height:1.15;color:#f3f0ea}
-  .spk{border:0;background:transparent;font-size:20px;cursor:pointer;vertical-align:middle;opacity:.7;padding:2px 4px}
-  .spk:hover{opacity:1}
+  .word{font-size:clamp(28px,7vw,40px);line-height:1.15;font-weight:800;letter-spacing:-.015em}
+  .spk{border:0;background:transparent;font-size:20px;cursor:pointer;vertical-align:middle;opacity:.65;padding:2px 4px;transition:opacity .15s,transform .15s}
+  .spk:hover{opacity:1;transform:scale(1.12)}
   .spk.small{font-size:14px}
-  .sent{margin:18px auto 0;max-width:42ch;font-size:16.5px;line-height:1.55;color:#b9c2d0;background:#1d242f;border-left:3px solid #f97316;padding:10px 14px;border-radius:0 10px 10px 0;text-align:left}
-  .face.back .sent{background:#182636;border-left-color:#5b87c5}
-  .hl{color:#fdba74}
-  .hintrow{text-align:center;font-size:12px;color:#6b7686;min-height:15px}
+  .sent{
+    margin:18px auto 0;max-width:42ch;font-size:16.5px;line-height:1.55;color:#c2c9d8;
+    background:rgba(0,0,0,.25);border-left:3px solid var(--ac);
+    padding:11px 14px;border-radius:4px 14px 14px 4px;text-align:left;
+  }
+  .hl{color:var(--hl);font-weight:700}
+  .hintrow{text-align:center;font-size:12px;color:var(--dim);min-height:15px}
   .controls{display:flex;gap:10px}
   .controls .bigbtn{margin-top:0}
-  .rateb{flex:1;border:0;padding:14px;border-radius:13px;font-size:15.5px;font-weight:700;cursor:pointer}
-  .rateb.bad{background:#3a2320;color:#f0917f}
-  .rateb.goodb{background:#1f8f4d;color:#fff;box-shadow:0 3px 12px rgba(34,197,94,.25)}
-  .linkbtn{display:block;margin:12px auto 0;border:0;background:none;color:#7d8798;font-size:13px;cursor:pointer;text-decoration:underline}
+  .rateb{flex:1;border:0;padding:15px;border-radius:15px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .12s}
+  .rateb:active{transform:scale(.97)}
+  .rateb.bad{background:rgba(244,93,62,.16);color:#ff9d87;border:1px solid rgba(244,93,62,.35)}
+  .rateb.goodb{background:linear-gradient(135deg,#16a34a,#4ade80);color:#06130a;box-shadow:0 5px 18px rgba(34,197,94,.3)}
+  .linkbtn{display:block;margin:12px auto 0;border:0;background:none;color:var(--dim);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit}
   .center{text-align:center}
   .donebig{font-size:46px;margin-bottom:4px}
 
-  .search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2a3342;background:#1a202b;color:#e7e4de;font-size:15px;margin-bottom:8px}
-  .search::placeholder{color:#69748a}
-  .ghead{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:#d4a95c;margin:18px 4px 8px;display:flex;justify-content:space-between;gap:8px}
-  .ghead span{color:#6b7686;flex-shrink:0}
-  .row{display:flex;gap:10px;align-items:flex-start;background:#161c25;border:1px solid #232c3a;border-radius:13px;padding:11px 13px;margin-bottom:7px}
+  .search{
+    width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--line2);
+    background:var(--card);color:var(--txt);font-size:15px;margin-bottom:8px;font-family:inherit;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .search:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 22%,transparent)}
+  .search::placeholder{color:var(--dim)}
+  .ghead{font-size:12.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--hl);margin:18px 4px 8px;display:flex;justify-content:space-between;gap:8px;font-weight:800}
+  .ghead span{color:var(--dim);flex-shrink:0}
+  .row{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:12px 13px;margin-bottom:7px}
   .rmain{flex:1;min-width:0}
   .rtop{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-  .rtop b{font-size:15.5px;color:#f3f0ea}
-  .ren{color:#98a2b3;font-size:13.5px}
-  .rsent{font-size:12.5px;color:#7d8798;margin-top:3px;line-height:1.45}
-  .rsent i{color:#5f6b7e}
+  .rtop b{font-size:15.5px;color:var(--txt)}
+  .ren{color:var(--mut);font-size:13.5px}
+  .rsent{font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.45}
+  .rsent i{color:var(--dim);opacity:.8}
   .rside{display:flex;align-items:center;gap:4px;flex-shrink:0}
   .rside .dots{transform:scale(.85)}
-  .del{border:0;background:none;cursor:pointer;font-size:15px;opacity:.6;padding:2px 4px}
+  .del{border:0;background:none;cursor:pointer;font-size:15px;opacity:.55;padding:2px 4px}
   .del:hover{opacity:1}
-  .empty{color:#7d8798;text-align:center;padding:30px 0}
+  .empty{color:var(--dim);text-align:center;padding:30px 0}
 
-  .frm label{display:block;font-size:13px;color:#8b95a5;margin:12px 0 4px}
-  .frm input,.frm select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid #2a3342;background:#1a202b;color:#e7e4de;font-size:15px;font-family:inherit}
-  .frm input::placeholder{color:#69748a}
+  .frm label{display:block;font-size:13px;color:var(--mut);margin:12px 0 5px}
+  .frm input,.frm select{
+    width:100%;padding:12px 13px;border-radius:12px;border:1px solid var(--line2);
+    background:rgba(0,0,0,.25);color:var(--txt);font-size:15px;font-family:inherit;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .frm input:focus,.frm select:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 22%,transparent)}
+  .frm input::placeholder{color:var(--dim)}
   #f-newcat{margin-top:6px;display:none}
-  .formhint{font-size:12px;color:#6b7686;margin-top:10px}
+  .formhint{font-size:12px;color:var(--dim);margin-top:10px}
 
-  .foot{margin-top:26px;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:12px;color:#6b7686;text-align:center}
-  .foot a{color:#8fb0e0;cursor:pointer;text-decoration:underline}
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#e7e4de;color:#16202b;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:50;max-width:90vw}
+  .foot{margin-top:28px;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:12px;color:var(--dim);text-align:center}
+  .foot a{color:var(--mut);cursor:pointer;text-decoration:underline}
+  .foot a:hover{color:var(--txt)}
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--txt);color:#11131c;padding:11px 19px;border-radius:99px;
+    font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:90vw;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+  }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:40}
-  .loginbox{background:#161c25;border:1px solid #242d3b;border-radius:20px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:32px 26px;width:min(360px,92vw);text-align:center}
-  .loginbox .logo{font-size:54px;display:block;margin-bottom:6px}
-  .loginbox h1{font-size:28px;margin:0 0 4px}
-  .loginbox p{color:#8b95a5;font-size:13.5px;margin:0 0 18px}
-  .loginbox input{width:100%;padding:12px 14px;border-radius:11px;border:1px solid #2a3342;background:#1a202b;color:#e7e4de;font-size:15px;margin-bottom:10px}
-  .loginbox input::placeholder{color:#69748a}
-  .loginerr{color:#f0917f;font-size:13px;min-height:18px;margin:2px 0 4px}
+  .loginbox{
+    background:var(--card);border:1px solid var(--line2);border-radius:26px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);padding:36px 28px;width:min(370px,92vw);text-align:center;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    animation:loginin .45s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes loginin{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+  .loginbox .logo{font-size:50px;display:block;margin-bottom:8px}
+  .loginbox h1{font-size:32px;margin:0 0 6px}
+  .loginbox .logintag{color:var(--mut);font-size:13.5px;margin:0 0 20px;line-height:1.55}
+  .loginbox input{
+    width:100%;padding:13px 15px;border-radius:13px;border:1px solid var(--line2);
+    background:rgba(0,0,0,.25);color:var(--txt);font-size:15px;margin-bottom:10px;font-family:inherit;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .loginbox input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 22%,transparent)}
+  .loginbox input::placeholder{color:var(--dim)}
+  .loginhint{color:var(--hl);font-size:12.5px;line-height:1.5;margin:2px 0 4px;min-height:0}
+  .loginerr{color:#ff9d87;font-size:13px;min-height:18px;margin:2px 0 4px}
+
+  /* ---------------- Pıtırcık 🐶 ---------------- */
+  #dog{
+    position:fixed;right:12px;bottom:74px;z-index:30;cursor:pointer;
+    display:none;width:96px;text-align:center;user-select:none;-webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body.user-aruna #dog{display:block}
+  #dog svg{
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+    animation:dogbreathe 3.2s ease-in-out infinite;
+    transform-origin:50% 90%;
+  }
+  #dog:hover svg{animation-duration:1.6s}
+  #dog:focus-visible{outline:2px solid var(--ac);outline-offset:4px;border-radius:18px}
+  @keyframes dogbreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+  #dogtail{transform-origin:98px 84px;animation:dogwag 1.4s ease-in-out infinite}
+  @keyframes dogwag{0%,100%{transform:rotate(0deg)}50%{transform:rotate(14deg)}}
+  #dogeyes{transform-origin:70px 43px;animation:dogblink 4.6s infinite}
+  @keyframes dogblink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
+  #dogtongue{opacity:0;transition:opacity .15s}
+  #dog.petting svg{animation:dogpet .5s ease}
+  #dog.petting #dogtail{animation-duration:.35s}
+  #dog.petting #dogtongue{opacity:1}
+  @keyframes dogpet{
+    0%{transform:scale(1) rotate(0)}
+    30%{transform:scale(1.12,.92) rotate(-4deg)}
+    60%{transform:scale(.95,1.06) rotate(3deg)}
+    100%{transform:scale(1) rotate(0)}
+  }
+  .dogtag{
+    display:inline-block;margin-top:2px;font-size:11px;font-weight:800;color:#11131c;
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    border-radius:99px;padding:3px 10px;letter-spacing:.02em;
+    box-shadow:0 3px 10px rgba(0,0,0,.35);
+  }
+  .dogbubble{
+    position:absolute;top:-26px;left:50%;transform:translateX(-50%) scale(.7);
+    background:var(--txt);color:#11131c;font-size:12.5px;font-weight:800;
+    padding:5px 11px;border-radius:13px;opacity:0;pointer-events:none;
+    transition:all .2s cubic-bezier(.2,.9,.3,1.3);white-space:nowrap;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+  .dogbubble.show{opacity:1;transform:translateX(-50%) scale(1)}
+  .dogheart{
+    position:absolute;bottom:64px;font-size:15px;pointer-events:none;
+    animation:heartfloat .95s ease-out forwards;
+  }
+  @keyframes heartfloat{
+    from{opacity:0;transform:translateY(6px) scale(.6)}
+    25%{opacity:1}
+    to{opacity:0;transform:translateY(-46px) scale(1.25) rotate(8deg)}
+  }
 
   .hidden{display:none!important}
   @media(max-width:430px){
     .optrow{flex-direction:column;align-items:flex-start;gap:6px}
     .optrow>label:first-child{width:auto}
+    #dog{width:84px;bottom:70px}
+    #dog svg{width:80px;height:69px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    body::before,body::after,#dog svg,#dogtail,#dogeyes{animation:none}
+    .panel.on,.scene.deal,.loginbox{animation:none}
   }
 </style>
 </head>
@@ -140,13 +297,14 @@
 
 <div id="login" class="login hidden">
   <div class="loginbox">
-    <span class="logo">🧀</span>
-    <h1>Woordjes</h1>
-    <p>1000 Dutch words · log in om verder te gaan</p>
-    <input id="login-user" placeholder="Username" autocomplete="username">
+    <span class="logo">🔐</span>
+    <h1 class="gradname">The Aru App</h1>
+    <p class="logintag">🇳🇱 Dutch &amp; Italian 🇮🇹 flashcards<br>1000 words each · made for two very special students</p>
+    <input id="login-user" placeholder="Your name" autocomplete="username">
     <input id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+    <p class="loginhint" id="login-hint"></p>
     <div class="loginerr" id="login-err"></div>
-    <button class="bigbtn" id="login-btn" style="margin-top:4px">Log in</button>
+    <button class="bigbtn" id="login-btn" style="margin-top:4px">Enter</button>
   </div>
 </div>
 
@@ -154,10 +312,10 @@
 
   <header class="top">
     <div class="brand">
-      <span class="logo">🧀</span>
+      <span class="logo" id="brandflag">🇳🇱</span>
       <div>
-        <h1>Woordjes</h1>
-        <p>1000 essential Dutch words · in context</p>
+        <h1 class="gradname">The Aru App</h1>
+        <p id="brandsub">1000 essential Dutch words · in context</p>
       </div>
     </div>
     <div class="chips" id="stats"></div>
@@ -171,7 +329,7 @@
 
   <section id="panel-study" class="panel on">
     <div id="start" class="box">
-      <h2>Klaar om te leren?</h2>
+      <h2 id="greeth2">Klaar om te leren?</h2>
       <p class="duemsg" id="duemsg"></p>
       <div class="goalwrap">
         <div class="goallabel"><span>🎯 Today</span><span id="goaltext"></span></div>
@@ -190,7 +348,7 @@
       </div>
       <div class="optrow">
         <label></label>
-        <label class="chk"><input type="checkbox" id="autospeak"> Auto-pronounce Dutch 🔊</label>
+        <label class="chk"><input type="checkbox" id="autospeak"> <span id="autospeaklbl">Auto-pronounce Dutch 🔊</span></label>
       </div>
       <button class="bigbtn" id="startbtn">Start studying</button>
       <p class="paceline" id="paceline"></p>
@@ -219,11 +377,11 @@
   <section id="panel-add" class="panel">
     <div class="box frm">
       <h2>Add your own word</h2>
-      <label for="f-nl">Dutch *</label>
+      <label for="f-nl" id="lbl-word">Dutch *</label>
       <input id="f-nl" placeholder="de fietsenmaker">
       <label for="f-en">English *</label>
       <input id="f-en" placeholder="the bicycle repairman">
-      <label for="f-nls">Dutch example sentence</label>
+      <label for="f-nls" id="lbl-sent">Dutch example sentence</label>
       <input id="f-nls" placeholder="Mijn fiets staat bij de *fietsenmaker*.">
       <label for="f-ens">English example sentence</label>
       <input id="f-ens" placeholder="My bike is at the bicycle repairman.">
@@ -231,7 +389,7 @@
       <select id="f-cat"></select>
       <input id="f-newcat" placeholder="New category name">
       <button class="bigbtn" id="addbtn">Add word</button>
-      <p class="formhint">Tip: wrap the word in *asterisks* inside the Dutch sentence to highlight it on the card.</p>
+      <p class="formhint" id="addhint">Tip: wrap the word in *asterisks* inside the Dutch sentence to highlight it on the card.</p>
     </div>
   </section>
 
@@ -242,14 +400,58 @@
   </footer>
 
 </div>
+
+<!-- Pıtırcık 🐶 — Aruna's fluffy white maltese-pumi. Tap to pet! -->
+<div id="dog" role="button" tabindex="0" aria-label="Pet Pıtırcık the dog" title="Pıtırcık">
+  <div class="dogbubble" id="dogbubble"></div>
+  <svg viewBox="0 0 140 124" width="92" height="82" aria-hidden="true">
+    <g id="dogtail">
+      <circle cx="106" cy="76" r="9" fill="#fff"/>
+      <circle cx="112" cy="70" r="6.5" fill="#fff"/>
+    </g>
+    <g id="dogbody">
+      <ellipse cx="70" cy="92" rx="31" ry="21" fill="#fff"/>
+      <circle cx="46" cy="98" r="9" fill="#fff"/>
+      <circle cx="94" cy="98" r="9" fill="#fff"/>
+      <circle cx="58" cy="106" r="8" fill="#fff"/>
+      <circle cx="82" cy="106" r="8" fill="#fff"/>
+      <ellipse cx="56" cy="111" rx="8" ry="5" fill="#f6f3fc"/>
+      <ellipse cx="84" cy="111" rx="8" ry="5" fill="#f6f3fc"/>
+    </g>
+    <g id="doghead">
+      <ellipse id="dogearL" cx="44" cy="42" rx="10" ry="17" fill="#f1ecfa" transform="rotate(18 44 42)"/>
+      <ellipse id="dogearR" cx="96" cy="42" rx="10" ry="17" fill="#f1ecfa" transform="rotate(-18 96 42)"/>
+      <circle cx="70" cy="44" r="26" fill="#fff"/>
+      <circle cx="50" cy="32" r="9" fill="#fff"/>
+      <circle cx="62" cy="24" r="10" fill="#fff"/>
+      <circle cx="78" cy="24" r="10" fill="#fff"/>
+      <circle cx="90" cy="32" r="9" fill="#fff"/>
+      <circle cx="48" cy="50" r="8" fill="#fff"/>
+      <circle cx="92" cy="50" r="8" fill="#fff"/>
+      <ellipse cx="55" cy="53" rx="4.5" ry="2.6" fill="#f9c1d4" opacity=".55"/>
+      <ellipse cx="85" cy="53" rx="4.5" ry="2.6" fill="#f9c1d4" opacity=".55"/>
+      <g id="dogeyes">
+        <circle cx="61" cy="43" r="3.3" fill="#2b2733"/>
+        <circle cx="79" cy="43" r="3.3" fill="#2b2733"/>
+        <circle cx="62.2" cy="41.8" r="1.1" fill="#fff"/>
+        <circle cx="80.2" cy="41.8" r="1.1" fill="#fff"/>
+      </g>
+      <path d="M66,51 q4,-3.2 8,0 q-1.2,5 -4,5 q-2.8,0 -4,-5 z" fill="#2b2733"/>
+      <path d="M70,56 v3 M66,60 q4,3.4 8,0" stroke="#2b2733" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <ellipse id="dogtongue" cx="70" cy="64" rx="3.4" ry="4.6" fill="#f786ad"/>
+    </g>
+  </svg>
+  <div class="dogtag">Pıtırcık</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 
-/* ---------------- built-in deck: 1000 words, 5 levels x 200 ----------------
+/* ---------------- built-in deck NL: 1000 Dutch words, 5 levels x 200 ----------------
    [level, dutch, english, dutch sentence (*word* = highlight), english sentence] */
-const RAW = [
+const RAW_NL = [
 /* ===== Level 1 · Survival basics (200) ===== */
 ["Level 1","hallo","hello","*Hallo*, hoe gaat het met je?","Hello, how are you?"],
 ["Level 1","hoi","hi","*Hoi*! Leuk je te zien.","Hi! Nice to see you."],
@@ -1257,9 +1459,1040 @@ const RAW = [
 ["Level 5","de sfeer","the atmosphere","De *sfeer* in het huis is heel goed.","The atmosphere in the house is really good."],
 ];
 
-const CARDS = RAW.map(function(r){
-  return {id:"w:"+r[1], cat:r[0], nl:r[1], en:r[2], nls:r[3], ens:r[4], builtin:true};
-});
+/* ---------------- built-in deck IT: 1000 Italian words, 5 levels x 200 ----------------
+   [level, italian, english, italian sentence (*word* = highlight), english sentence] */
+const RAW_IT = [
+/* ===== Level 1 · Survival basics (200) ===== */
+["Level 1","ciao","hi / bye","*Ciao*, come stai?","Hi, how are you?"],
+["Level 1","buongiorno","good morning","*Buongiorno*! Un caffè, per favore.","Good morning! A coffee, please."],
+["Level 1","buonasera","good evening","*Buonasera*, benvenuti al ristorante.","Good evening, welcome to the restaurant."],
+["Level 1","buonanotte","good night","*Buonanotte*, dormi bene!","Good night, sleep well!"],
+["Level 1","arrivederci","goodbye","*Arrivederci*, alla prossima!","Goodbye, until next time!"],
+["Level 1","a presto","see you soon","Devo andare, *a presto*!","I have to go, see you soon!"],
+["Level 1","a domani","see you tomorrow","Finiamo qui, *a domani*!","Let us stop here, see you tomorrow!"],
+["Level 1","buon appetito","enjoy your meal","La pasta è pronta, *buon appetito*!","The pasta is ready, enjoy your meal!"],
+["Level 1","come stai","how are you","Ciao Marco, *come stai*?","Hi Marco, how are you?"],
+["Level 1","piacere","nice to meet you","*Piacere*, io sono Aruna.","Nice to meet you, I am Aruna."],
+["Level 1","come ti chiami","what is your name","Ciao! *Come ti chiami*?","Hi! What is your name?"],
+["Level 1","mi chiamo","my name is","*Mi chiamo* Aruna, e tu?","My name is Aruna, and you?"],
+["Level 1","non capisco","I do not understand","Scusa, *non capisco*. Puoi ripetere?","Sorry, I do not understand. Can you repeat?"],
+["Level 1","per favore","please","Un bicchiere d'acqua, *per favore*.","A glass of water, please."],
+["Level 1","grazie","thank you","*Grazie* mille per l'aiuto!","Thanks a lot for the help!"],
+["Level 1","prego","you are welcome","Grazie! — *Prego*, di niente.","Thank you! — You are welcome, no problem."],
+["Level 1","scusa","sorry / excuse me (informal)","*Scusa*, è tardi: devo andare.","Sorry, it is late: I have to go."],
+["Level 1","mi dispiace","I am sorry","*Mi dispiace*, non posso venire stasera.","I am sorry, I cannot come tonight."],
+["Level 1","aiuto","help","*Aiuto*! Ho perso il portafoglio!","Help! I lost my wallet!"],
+["Level 1","va bene","okay / all right","*Va bene*, ci vediamo alle otto.","Okay, see you at eight."],
+["Level 1","certo","of course","Posso entrare? *Certo*!","May I come in? Of course!"],
+["Level 1","ecco","here it is","*Ecco* il tuo caffè.","Here is your coffee."],
+["Level 1","io","I","*Io* sono studentessa.","I am a student."],
+["Level 1","tu","you (informal)","*Tu* di dove sei?","Where are you from?"],
+["Level 1","lui","he","*Lui* è il mio vicino di casa.","He is my neighbor."],
+["Level 1","lei","she / you (formal)","*Lei* parla tre lingue.","She speaks three languages."],
+["Level 1","noi","we","*Noi* studiamo insieme il martedì.","We study together on Tuesdays."],
+["Level 1","voi","you (plural)","*Voi* venite alla festa?","Are you all coming to the party?"],
+["Level 1","loro","they","*Loro* abitano in centro.","They live in the city center."],
+["Level 1","mio","my / mine","Il *mio* telefono è scarico.","My phone battery is dead."],
+["Level 1","tuo","your / yours","Questo è il *tuo* posto.","This is your seat."],
+["Level 1","suo","his / her","Il *suo* cane si chiama Pıtırcık.","Her dog is called Pıtırcık."],
+["Level 1","nostro","our / ours","Il *nostro* appartamento è piccolo ma carino.","Our apartment is small but cute."],
+["Level 1","questo","this","*Questo* libro è molto interessante.","This book is very interesting."],
+["Level 1","quello","that","*Quello* zaino è di Aruna.","That backpack is Aruna's."],
+["Level 1","qualcosa","something","Vuoi mangiare *qualcosa*?","Do you want to eat something?"],
+["Level 1","niente","nothing","Non ho capito *niente* della lezione.","I understood nothing of the lesson."],
+["Level 1","qualcuno","someone","*Qualcuno* ha visto le mie chiavi?","Has someone seen my keys?"],
+["Level 1","nessuno","nobody","*Nessuno* risponde al telefono.","Nobody answers the phone."],
+["Level 1","tutto","everything","Va *tutto* bene, non ti preoccupare.","Everything is fine, do not worry."],
+["Level 1","chi","who","*Chi* viene al cinema stasera?","Who is coming to the cinema tonight?"],
+["Level 1","che cosa","what","*Che cosa* fai questo weekend?","What are you doing this weekend?"],
+["Level 1","dove","where","*Dove* abiti adesso?","Where do you live now?"],
+["Level 1","quando","when","*Quando* inizia il film?","When does the movie start?"],
+["Level 1","perché","why / because","*Perché* studi l'italiano?","Why do you study Italian?"],
+["Level 1","come","how","*Come* si dice questo in italiano?","How do you say this in Italian?"],
+["Level 1","quanto","how much","*Quanto* costa questo libro?","How much does this book cost?"],
+["Level 1","quale","which","*Quale* autobus va in centro?","Which bus goes to the center?"],
+["Level 1","uno","one","Ho solo *uno* zaino.","I have only one backpack."],
+["Level 1","due","two","Vorrei *due* biglietti, per favore.","I would like two tickets, please."],
+["Level 1","tre","three","Il corso dura *tre* mesi.","The course lasts three months."],
+["Level 1","quattro","four","Abitiamo in *quattro* nell'appartamento.","Four of us live in the apartment."],
+["Level 1","cinque","five","La lezione finisce alle *cinque*.","The class ends at five."],
+["Level 1","sei","six","Mi sveglio alle *sei* di mattina.","I wake up at six in the morning."],
+["Level 1","sette","seven","La settimana ha *sette* giorni.","The week has seven days."],
+["Level 1","otto","eight","Il negozio apre alle *otto*.","The shop opens at eight."],
+["Level 1","nove","nine","Il treno parte alle *nove* in punto.","The train leaves at nine sharp."],
+["Level 1","dieci","ten","Mancano *dieci* minuti alla fine.","Ten minutes remain until the end."],
+["Level 1","diciotto","eighteen","In Italia si vota a *diciotto* anni.","In Italy you can vote at eighteen."],
+["Level 1","venti","twenty","Il libro costa *venti* euro.","The book costs twenty euros."],
+["Level 1","cento","one hundred","*Cento* grammi di prosciutto, per favore.","One hundred grams of ham, please."],
+["Level 1","mille","one thousand","Questa app insegna *mille* parole.","This app teaches one thousand words."],
+["Level 1","lunedì","Monday","Il *lunedì* inizio sempre stanca.","On Mondays I always start tired."],
+["Level 1","martedì","Tuesday","Il *martedì* ho lezione di italiano.","On Tuesdays I have Italian class."],
+["Level 1","mercoledì","Wednesday","*Mercoledì* andiamo al mercato.","On Wednesday we go to the market."],
+["Level 1","giovedì","Thursday","*Giovedì* sera c'è la partita.","Thursday evening there is the match."],
+["Level 1","venerdì","Friday","Finalmente è *venerdì*!","Finally it is Friday!"],
+["Level 1","sabato","Saturday","Il *sabato* dormo fino a tardi.","On Saturdays I sleep in late."],
+["Level 1","domenica","Sunday","La *domenica* pranziamo dai nonni.","On Sundays we have lunch at our grandparents'."],
+["Level 1","il giorno","the day","Che *giorno* è oggi?","What day is it today?"],
+["Level 1","la settimana","the week","La prossima *settimana* ho tre esami.","Next week I have three exams."],
+["Level 1","il fine settimana","the weekend","Che fai il *fine settimana*?","What are you doing on the weekend?"],
+["Level 1","la mattina","the morning","La *mattina* bevo sempre un caffè.","In the morning I always drink a coffee."],
+["Level 1","il pomeriggio","the afternoon","Il *pomeriggio* studio in biblioteca.","In the afternoon I study in the library."],
+["Level 1","la sera","the evening","La *sera* guardiamo una serie.","In the evening we watch a series."],
+["Level 1","la notte","the night","La *notte* la città è silenziosa.","At night the city is quiet."],
+["Level 1","l'ora","the hour / time","Che *ora* è? Sono le tre.","What time is it? It is three."],
+["Level 1","essere","to be","Voglio *essere* puntuale domani.","I want to be on time tomorrow."],
+["Level 1","avere","to have","Penso di *avere* la risposta giusta.","I think I have the right answer."],
+["Level 1","fare","to do / to make","Cosa vuoi *fare* stasera?","What do you want to do tonight?"],
+["Level 1","andare","to go","Devo *andare* a casa presto.","I have to go home early."],
+["Level 1","venire","to come","Vuoi *venire* con noi al mare?","Do you want to come with us to the seaside?"],
+["Level 1","stare","to stay / to be","Preferisco *stare* a casa stasera.","I prefer to stay home tonight."],
+["Level 1","dare","to give","Puoi *dare* questo libro a Marco?","Can you give this book to Marco?"],
+["Level 1","dire","to say","Cosa vuoi *dire* esattamente?","What exactly do you mean?"],
+["Level 1","potere","can / to be able","Non *potere* dormire è terribile.","Not being able to sleep is terrible."],
+["Level 1","volere","to want","*Volere* è potere, dice il proverbio.","Where there is a will there is a way, says the proverb."],
+["Level 1","dovere","must / to have to","Studiare è un *dovere*, ma anche un piacere.","Studying is a duty, but also a pleasure."],
+["Level 1","sapere","to know (facts)","Vorrei *sapere* a che ora apre il museo.","I would like to know what time the museum opens."],
+["Level 1","vedere","to see","Non *vedere* il mare mi manca.","I miss not seeing the sea."],
+["Level 1","sentire","to hear / to feel","Non riesco a *sentire* la musica.","I cannot hear the music."],
+["Level 1","parlare","to speak","Mi piace *parlare* italiano con te.","I like speaking Italian with you."],
+["Level 1","mangiare","to eat","Andiamo a *mangiare* una pizza?","Shall we go eat a pizza?"],
+["Level 1","bere","to drink","Vuoi *bere* un bicchiere d'acqua?","Do you want to drink a glass of water?"],
+["Level 1","prendere","to take","Devo *prendere* il treno delle otto.","I have to take the eight o'clock train."],
+["Level 1","mettere","to put","Dove devo *mettere* lo zaino?","Where should I put the backpack?"],
+["Level 1","capire","to understand","Ora comincio a *capire* l'italiano.","Now I am starting to understand Italian."],
+["Level 1","pensare","to think","Devo *pensare* alla tua proposta.","I have to think about your proposal."],
+["Level 1","trovare","to find","Non riesco a *trovare* le chiavi.","I cannot find my keys."],
+["Level 1","cercare","to look for","Sto *cercando* una camera in affitto.","I am looking for a room to rent."],
+["Level 1","aprire","to open","Puoi *aprire* la finestra, per favore?","Can you open the window, please?"],
+["Level 1","chiudere","to close","Ricorda di *chiudere* la porta a chiave.","Remember to lock the door."],
+["Level 1","iniziare","to start","Il corso deve ancora *iniziare*.","The course has yet to start."],
+["Level 1","finire","to finish","Devo *finire* i compiti entro stasera.","I have to finish my homework by tonight."],
+["Level 1","arrivare","to arrive","Il treno sta per *arrivare*.","The train is about to arrive."],
+["Level 1","partire","to leave / to depart","L'autobus sta per *partire*.","The bus is about to leave."],
+["Level 1","tornare","to return","Vorrei *tornare* in Italia ogni estate.","I would like to return to Italy every summer."],
+["Level 1","aspettare","to wait","Puoi *aspettare* cinque minuti?","Can you wait five minutes?"],
+["Level 1","aiutare","to help","Posso *aiutare* con le valigie?","Can I help with the suitcases?"],
+["Level 1","chiamarsi","to be called","Come si fa a *chiamarsi* Pıtırcık? È adorabile!","How can one be called Pıtırcık? It is adorable!"],
+["Level 1","abitare","to live (reside)","Mi piace *abitare* vicino al centro.","I like living close to the center."],
+["Level 1","grande","big","Questa piazza è davvero *grande*.","This square is really big."],
+["Level 1","piccolo","small","Il mio appartamento è *piccolo* ma comodo.","My apartment is small but comfortable."],
+["Level 1","buono","good","Questo gelato è davvero *buono*.","This ice cream is really good."],
+["Level 1","cattivo","bad","Il caffè qui non è *cattivo*.","The coffee here is not bad."],
+["Level 1","bello","beautiful","Che *bello* questo tramonto!","How beautiful this sunset is!"],
+["Level 1","brutto","ugly / bad","Oggi il tempo è *brutto*.","Today the weather is bad."],
+["Level 1","nuovo","new","Ho comprato un telefono *nuovo*.","I bought a new phone."],
+["Level 1","vecchio","old","Questo è un palazzo molto *vecchio*.","This is a very old building."],
+["Level 1","giovane","young","Il professore è ancora *giovane*.","The professor is still young."],
+["Level 1","caldo","hot / warm","In agosto fa molto *caldo*.","In August it is very hot."],
+["Level 1","freddo","cold","Questo inverno è davvero *freddo*.","This winter is really cold."],
+["Level 1","facile","easy","Questo esercizio è *facile*.","This exercise is easy."],
+["Level 1","difficile","difficult","La grammatica italiana non è così *difficile*.","Italian grammar is not that difficult."],
+["Level 1","giusto","right / correct","La tua risposta è *giusta*.","Your answer is correct."],
+["Level 1","sbagliato","wrong","Ho preso l'autobus *sbagliato*.","I took the wrong bus."],
+["Level 1","aperto","open","Il bar è ancora *aperto*?","Is the bar still open?"],
+["Level 1","chiuso","closed","Il museo è *chiuso* il lunedì.","The museum is closed on Mondays."],
+["Level 1","veloce","fast","Il treno *veloce* arriva prima.","The fast train arrives earlier."],
+["Level 1","lento","slow","Questo wifi è troppo *lento*.","This wifi is too slow."],
+["Level 1","importante","important","Domani ho un esame *importante*.","Tomorrow I have an important exam."],
+["Level 1","rosso","red","Il semaforo è *rosso*, aspetta!","The light is red, wait!"],
+["Level 1","blu","blue","Il cielo oggi è *blu* e limpido.","Today the sky is blue and clear."],
+["Level 1","verde","green","Mi piace il tè *verde*.","I like green tea."],
+["Level 1","giallo","yellow","Il taxi *giallo* è qui fuori.","The yellow taxi is outside."],
+["Level 1","nero","black","Prendo un caffè *nero*, grazie.","I will have a black coffee, thanks."],
+["Level 1","bianco","white","Pıtırcık è un cane *bianco* e morbido.","Pıtırcık is a white, fluffy dog."],
+["Level 1","sì","yes","*Sì*, vengo volentieri!","Yes, I will gladly come!"],
+["Level 1","no","no","*No*, grazie, sono a posto.","No, thank you, I am fine."],
+["Level 1","non","not","*Non* ho fame adesso.","I am not hungry now."],
+["Level 1","anche","also / too","Vengo *anche* io alla festa!","I am also coming to the party!"],
+["Level 1","ma","but","Vorrei uscire, *ma* devo studiare.","I would like to go out, but I have to study."],
+["Level 1","e","and","Prendo un caffè *e* un cornetto.","I will have a coffee and a croissant."],
+["Level 1","o","or","Preferisci tè *o* caffè?","Do you prefer tea or coffee?"],
+["Level 1","molto","very / a lot","Questa città mi piace *molto*.","I like this city a lot."],
+["Level 1","poco","little / few","Ho *poco* tempo oggi.","I have little time today."],
+["Level 1","bene","well","Parli già *bene* l'italiano!","You already speak Italian well!"],
+["Level 1","male","badly","Ho dormito *male* stanotte.","I slept badly last night."],
+["Level 1","oggi","today","*Oggi* è una bella giornata.","Today is a beautiful day."],
+["Level 1","domani","tomorrow","*Domani* ho lezione alle nove.","Tomorrow I have class at nine."],
+["Level 1","ieri","yesterday","*Ieri* sono andata al mercato.","Yesterday I went to the market."],
+["Level 1","adesso","now","*Adesso* non posso parlare, scusa.","I cannot talk now, sorry."],
+["Level 1","sempre","always","Bevo *sempre* un caffè dopo pranzo.","I always drink a coffee after lunch."],
+["Level 1","mai","never","Non arrivo *mai* in ritardo.","I never arrive late."],
+["Level 1","qui","here","Abito *qui* da due mesi.","I have lived here for two months."],
+["Level 1","lì","there","Il supermercato è *lì*, a destra.","The supermarket is there, on the right."],
+["Level 1","forse","maybe","*Forse* domani piove.","Maybe it will rain tomorrow."],
+["Level 1","poi","then / later","Prima studio, *poi* esco.","First I study, then I go out."],
+["Level 1","subito","right away","Arrivo *subito*!","I am coming right away!"],
+["Level 1","insieme","together","Studiamo *insieme* per l'esame?","Shall we study together for the exam?"],
+["Level 1","il ragazzo","the boy / boyfriend","Il *ragazzo* di Maria studia medicina.","Maria's boyfriend studies medicine."],
+["Level 1","la ragazza","the girl / girlfriend","Quella *ragazza* è la mia coinquilina.","That girl is my flatmate."],
+["Level 1","la lingua","the language / tongue","L'italiano è una *lingua* musicale.","Italian is a musical language."],
+["Level 1","la parola","the word","Imparo dieci *parole* nuove al giorno.","I learn ten new words a day."],
+["Level 1","la domanda","the question","Posso fare una *domanda*?","May I ask a question?"],
+["Level 1","la risposta","the answer","La *risposta* giusta è la seconda.","The right answer is the second one."],
+["Level 1","l'acqua","the water","Un'*acqua* naturale, per favore.","A still water, please."],
+["Level 1","il caffè","the coffee","Prendiamo un *caffè* al bar?","Shall we get a coffee at the bar?"],
+["Level 1","il bagno","the bathroom","Scusi, dov'è il *bagno*?","Excuse me, where is the bathroom?"],
+["Level 1","la strada","the street / road","Questa *strada* porta al duomo.","This street leads to the cathedral."],
+["Level 1","la città","the city","Bologna è una *città* universitaria.","Bologna is a university city."],
+["Level 1","la casa","the house / home","Torno a *casa* alle sei.","I go home at six."],
+["Level 1","la porta","the door","La *porta* è aperta, entra pure.","The door is open, come on in."],
+["Level 1","la finestra","the window","Apro la *finestra* per cambiare aria.","I open the window to get fresh air."],
+["Level 1","il tavolo","the table","Il *tavolo* vicino alla finestra è libero.","The table by the window is free."],
+["Level 1","la sedia","the chair","Prendi una *sedia* e siediti con noi.","Grab a chair and sit with us."],
+["Level 1","destra","right (direction)","Il bar è sulla *destra*.","The bar is on the right."],
+["Level 1","sinistra","left (direction)","Gira a *sinistra* al semaforo.","Turn left at the traffic light."],
+["Level 1","vicino","near / close","La fermata è *vicino* a casa mia.","The stop is near my house."],
+["Level 1","lontano","far","Il campus non è *lontano* dal centro.","The campus is not far from the center."],
+["Level 1","con","with","Vengo *con* te al supermercato.","I am coming with you to the supermarket."],
+["Level 1","senza","without","Prendo il caffè *senza* zucchero.","I take my coffee without sugar."],
+["Level 1","per","for","Questo regalo è *per* te.","This gift is for you."],
+["Level 1","in","in","Abito *in* Italia da un anno.","I have lived in Italy for a year."],
+["Level 1","su","on","Il telefono è *su* quel tavolo.","The phone is on that table."],
+["Level 1","l'anno","the year","Quest'*anno* studio in Italia.","This year I am studying in Italy."],
+["Level 1","il mese","the month","Il *mese* prossimo torno a casa.","Next month I am going back home."],
+["Level 1","stanco","tired","Sono *stanca* dopo la lezione.","I am tired after the class."],
+["Level 1","contento","glad / happy","Sono *contenta* di essere qui.","I am glad to be here."],
+["Level 1","pronto","ready / hello (phone)","*Pronto*? Chi parla?","Hello? Who is speaking?"],
+["Level 1","libero","free / available","Questo posto è *libero*?","Is this seat free?"],
+["Level 1","occupato","occupied / busy","Il bagno è *occupato*.","The bathroom is occupied."],
+["Level 1","tutti","everyone / all","*Tutti* parlano del nuovo film.","Everyone is talking about the new movie."],
+["Level 1","ogni","every / each","Vado a correre *ogni* mattina.","I go running every morning."],
+["Level 1","altro","other / another","Vuoi un *altro* caffè?","Do you want another coffee?"],
+["Level 1","solo","only / alone","Ho *solo* cinque euro.","I only have five euros."],
+["Level 1","troppo","too much","Questo zaino pesa *troppo*.","This backpack weighs too much."],
+["Level 1","ancora","still / again","Piove *ancora*?","Is it still raining?"],
+["Level 1","prima","before / first","*Prima* di uscire, chiudi le finestre.","Before going out, close the windows."],
+["Level 1","dopo","after / later","Ci vediamo *dopo* la lezione.","See you after class."],
+/* ===== Level 2 · Daily life (200) ===== */
+["Level 2","il cibo","the food","Il *cibo* italiano è famoso nel mondo.","Italian food is famous around the world."],
+["Level 2","il pane","the bread","Compro il *pane* fresco ogni mattina.","I buy fresh bread every morning."],
+["Level 2","la pasta","the pasta","La *pasta* al pomodoro è il mio piatto preferito.","Pasta with tomato sauce is my favorite dish."],
+["Level 2","la pizza","the pizza","Stasera ordiniamo una *pizza* margherita.","Tonight we are ordering a margherita pizza."],
+["Level 2","la carne","the meat","Non mangio *carne*, sono vegetariana.","I do not eat meat, I am vegetarian."],
+["Level 2","il pesce","the fish","Al mare mangiamo sempre *pesce* fresco.","At the seaside we always eat fresh fish."],
+["Level 2","il pollo","the chicken","Il *pollo* arrosto della nonna è ottimo.","Grandma's roast chicken is excellent."],
+["Level 2","l'uovo","the egg","Per la carbonara serve un *uovo* fresco.","For carbonara you need a fresh egg."],
+["Level 2","il formaggio","the cheese","Il *formaggio* parmigiano è stagionato due anni.","Parmesan cheese is aged for two years."],
+["Level 2","il latte","the milk","Bevo il caffè con un po' di *latte*.","I drink my coffee with a little milk."],
+["Level 2","il burro","the butter","Metto il *burro* sul pane tostato.","I put butter on the toasted bread."],
+["Level 2","lo zucchero","the sugar","Quanto *zucchero* vuoi nel tè?","How much sugar do you want in your tea?"],
+["Level 2","il sale","the salt","Manca un po' di *sale* nella pasta.","The pasta needs a bit of salt."],
+["Level 2","il pepe","the pepper","Aggiungi *pepe* nero sulla carbonara.","Add black pepper on the carbonara."],
+["Level 2","l'olio","the oil","L'*olio* d'oliva è la base della cucina italiana.","Olive oil is the basis of Italian cooking."],
+["Level 2","la frutta","the fruit","Mangio *frutta* fresca ogni giorno.","I eat fresh fruit every day."],
+["Level 2","la mela","the apple","Una *mela* al giorno toglie il medico di torno.","An apple a day keeps the doctor away."],
+["Level 2","l'arancia","the orange (fruit)","Spremo un'*arancia* per colazione.","I squeeze an orange for breakfast."],
+["Level 2","la banana","the banana","Porto una *banana* per lo spuntino.","I bring a banana for a snack."],
+["Level 2","la verdura","the vegetables","Compro la *verdura* al mercato.","I buy vegetables at the market."],
+["Level 2","il pomodoro","the tomato","Il sugo si fa con il *pomodoro* fresco.","The sauce is made with fresh tomatoes."],
+["Level 2","l'insalata","the salad","A pranzo prendo solo un'*insalata*.","For lunch I just have a salad."],
+["Level 2","la patata","the potato","Le *patate* al forno sono croccanti.","The oven-baked potatoes are crispy."],
+["Level 2","il dolce","the dessert / sweet","Come *dolce* prendo il tiramisù.","For dessert I will have tiramisu."],
+["Level 2","la torta","the cake","Ho fatto una *torta* per il tuo compleanno.","I made a cake for your birthday."],
+["Level 2","il gelato","the ice cream","D'estate mangio un *gelato* al giorno.","In summer I eat an ice cream a day."],
+["Level 2","il cioccolato","the chocolate","Il *cioccolato* fondente è il mio preferito.","Dark chocolate is my favorite."],
+["Level 2","la colazione","the breakfast","Faccio *colazione* al bar sotto casa.","I have breakfast at the café below my place."],
+["Level 2","il pranzo","the lunch","Il *pranzo* della domenica dura ore.","Sunday lunch lasts for hours."],
+["Level 2","la cena","the dinner","La *cena* è pronta alle otto.","Dinner is ready at eight."],
+["Level 2","il vino","the wine","Un bicchiere di *vino* rosso, per favore.","A glass of red wine, please."],
+["Level 2","la birra","the beer","Una *birra* media, grazie.","A medium beer, thanks."],
+["Level 2","il tè","the tea","Preferisco il *tè* al caffè.","I prefer tea to coffee."],
+["Level 2","la bottiglia","the bottle","Porto una *bottiglia* di vino alla cena.","I will bring a bottle of wine to the dinner."],
+["Level 2","il bicchiere","the glass","Mi passi un *bicchiere* pulito?","Can you pass me a clean glass?"],
+["Level 2","il piatto","the plate / dish","Il *piatto* del giorno è lasagna.","The dish of the day is lasagna."],
+["Level 2","la tazza","the cup / mug","Bevo il tè in una *tazza* grande.","I drink tea from a big mug."],
+["Level 2","la forchetta","the fork","Mi è caduta la *forchetta* per terra.","I dropped my fork on the floor."],
+["Level 2","il cameriere","the waiter","Il *cameriere* ci porta il menu.","The waiter brings us the menu."],
+["Level 2","il conto","the bill","Il *conto*, per favore!","The bill, please!"],
+["Level 2","l'appartamento","the apartment","Cerco un *appartamento* in centro.","I am looking for an apartment in the center."],
+["Level 2","la camera","the room / bedroom","La mia *camera* è al secondo piano.","My room is on the second floor."],
+["Level 2","la cucina","the kitchen / cuisine","La *cucina* è piccola ma funzionale.","The kitchen is small but functional."],
+["Level 2","il letto","the bed","Vado a *letto* a mezzanotte.","I go to bed at midnight."],
+["Level 2","l'armadio","the wardrobe","L'*armadio* è pieno di vestiti.","The wardrobe is full of clothes."],
+["Level 2","il divano","the sofa","Il gatto dorme sul *divano*.","The cat sleeps on the sofa."],
+["Level 2","la doccia","the shower","Faccio una *doccia* veloce e arrivo.","I take a quick shower and I am coming."],
+["Level 2","la chiave","the key","Ho lasciato le *chiavi* in casa!","I left my keys inside the house!"],
+["Level 2","il frigorifero","the fridge","Il *frigorifero* è quasi vuoto.","The fridge is almost empty."],
+["Level 2","il forno","the oven","La pizza cuoce nel *forno* a legna.","The pizza bakes in the wood oven."],
+["Level 2","la lavatrice","the washing machine","La *lavatrice* è in bagno.","The washing machine is in the bathroom."],
+["Level 2","l'ascensore","the elevator","L'*ascensore* è rotto, prendiamo le scale.","The elevator is broken, let us take the stairs."],
+["Level 2","il piano","the floor (level)","Abito al terzo *piano*.","I live on the third floor."],
+["Level 2","il balcone","the balcony","Dal *balcone* si vede il duomo.","From the balcony you can see the cathedral."],
+["Level 2","la luce","the light","Spegni la *luce* quando esci.","Turn off the light when you leave."],
+["Level 2","il vicino di casa","the neighbor","Il *vicino di casa* suona il pianoforte.","The neighbor plays the piano."],
+["Level 2","il treno","the train","Il *treno* per Roma parte dal binario tre.","The train to Rome leaves from platform three."],
+["Level 2","l'autobus","the bus","Aspetto l'*autobus* da venti minuti.","I have been waiting for the bus for twenty minutes."],
+["Level 2","la metropolitana","the subway","Prendo la *metropolitana* per andare al lavoro.","I take the subway to go to work."],
+["Level 2","il taxi","the taxi","Chiamiamo un *taxi* per l'aeroporto.","Let us call a taxi to the airport."],
+["Level 2","la bicicletta","the bicycle","Vado all'università in *bicicletta*.","I go to university by bicycle."],
+["Level 2","la macchina","the car","La *macchina* è parcheggiata qui dietro.","The car is parked back here."],
+["Level 2","l'aereo","the airplane","L'*aereo* atterra alle dieci.","The plane lands at ten."],
+["Level 2","la stazione","the station","Ci vediamo davanti alla *stazione*.","See you in front of the station."],
+["Level 2","l'aeroporto","the airport","L'*aeroporto* è fuori città.","The airport is outside the city."],
+["Level 2","la fermata","the (bus) stop","La *fermata* è davanti alla farmacia.","The stop is in front of the pharmacy."],
+["Level 2","il binario","the platform / track","Il treno arriva al *binario* cinque.","The train arrives at platform five."],
+["Level 2","il biglietto","the ticket","Devi timbrare il *biglietto* prima di salire.","You must validate the ticket before boarding."],
+["Level 2","l'abbonamento","the season pass / subscription","Con l'*abbonamento* il bus costa meno.","With the season pass the bus costs less."],
+["Level 2","l'orario","the timetable / schedule","Controllo l'*orario* dei treni online.","I check the train timetable online."],
+["Level 2","il ritardo","the delay","Il volo ha due ore di *ritardo*.","The flight has a two-hour delay."],
+["Level 2","il viaggio","the trip / journey","Il *viaggio* in treno dura tre ore.","The train journey takes three hours."],
+["Level 2","la valigia","the suitcase","La mia *valigia* pesa venti chili.","My suitcase weighs twenty kilos."],
+["Level 2","lo zaino","the backpack","Porto il computer nello *zaino*.","I carry my laptop in my backpack."],
+["Level 2","il passaporto","the passport","Controlla di avere il *passaporto*!","Check that you have your passport!"],
+["Level 2","la patente","the driving license","Ho preso la *patente* a diciotto anni.","I got my driving license at eighteen."],
+["Level 2","salire","to get on / go up","Devi *salire* sul bus numero sette.","You have to get on bus number seven."],
+["Level 2","scendere","to get off / go down","Devo *scendere* alla prossima fermata.","I have to get off at the next stop."],
+["Level 2","guidare","to drive","Non mi piace *guidare* in città.","I do not like driving in the city."],
+["Level 2","parcheggiare","to park","È difficile *parcheggiare* in centro.","It is hard to park in the center."],
+["Level 2","il negozio","the shop","Il *negozio* chiude alle diciannove e trenta.","The shop closes at seven thirty pm."],
+["Level 2","il supermercato","the supermarket","Vado al *supermercato* dopo il lavoro.","I go to the supermarket after work."],
+["Level 2","il mercato","the market","Al *mercato* la frutta costa meno.","At the market fruit costs less."],
+["Level 2","il prezzo","the price","Il *prezzo* include la colazione.","The price includes breakfast."],
+["Level 2","i soldi","the money","Ho finito i *soldi* a metà mese.","I ran out of money mid-month."],
+["Level 2","l'euro","the euro","Il caffè costa un *euro* e dieci.","The coffee costs one euro ten."],
+["Level 2","il contante","the cash","Posso pagare solo in *contante*?","Can I only pay in cash?"],
+["Level 2","la carta","the card","Pago con la *carta*, grazie.","I will pay by card, thanks."],
+["Level 2","il bancomat","the ATM / debit card","C'è un *bancomat* qui vicino?","Is there an ATM nearby?"],
+["Level 2","lo sconto","the discount","Con la tessera hai uno *sconto* del dieci per cento.","With the loyalty card you get a ten percent discount."],
+["Level 2","l'offerta","the offer / deal","Questa settimana la pasta è in *offerta*.","This week pasta is on offer."],
+["Level 2","la cassa","the checkout / till","Paghi alla *cassa* numero due.","You pay at checkout number two."],
+["Level 2","lo scontrino","the receipt","Conserva lo *scontrino* per il cambio.","Keep the receipt for the exchange."],
+["Level 2","la borsa","the bag","La mia *borsa* è piena di libri.","My bag is full of books."],
+["Level 2","il regalo","the gift","Cerco un *regalo* per la mia amica.","I am looking for a gift for my friend."],
+["Level 2","comprare","to buy","Devo *comprare* il latte e il pane.","I have to buy milk and bread."],
+["Level 2","vendere","to sell","Qui *vendono* frutta biologica.","They sell organic fruit here."],
+["Level 2","pagare","to pay","Posso *pagare* con la carta?","Can I pay by card?"],
+["Level 2","costare","to cost","Quanto può *costare* una bici usata?","How much can a used bike cost?"],
+["Level 2","spendere","to spend","Non voglio *spendere* troppo stasera.","I do not want to spend too much tonight."],
+["Level 2","cambiare","to change / exchange","Vorrei *cambiare* questa maglietta.","I would like to exchange this t-shirt."],
+["Level 2","provare","to try / try on","Posso *provare* queste scarpe?","Can I try on these shoes?"],
+["Level 2","la taglia","the size (clothes)","Che *taglia* porti? La emme?","What size do you wear? Medium?"],
+["Level 2","economico","cheap","Questo ristorante è buono ed *economico*.","This restaurant is good and cheap."],
+["Level 2","caro","expensive / dear","Il centro è bello ma *caro*.","The center is beautiful but expensive."],
+["Level 2","gratis","free (of charge)","Il primo mese di abbonamento è *gratis*.","The first month of the subscription is free."],
+["Level 2","il tempo","the weather / time","Che *tempo* fa oggi a Milano?","What is the weather like in Milan today?"],
+["Level 2","il sole","the sun","Oggi c'è il *sole*, andiamo al parco!","Today it is sunny, let us go to the park!"],
+["Level 2","la pioggia","the rain","Odio camminare sotto la *pioggia*.","I hate walking in the rain."],
+["Level 2","la neve","the snow","In montagna c'è un metro di *neve*.","In the mountains there is a meter of snow."],
+["Level 2","il vento","the wind","Il *vento* ha rovesciato le sedie del bar.","The wind knocked over the café chairs."],
+["Level 2","la nebbia","the fog","Con la *nebbia* non si vede niente.","With the fog you cannot see anything."],
+["Level 2","il temporale","the thunderstorm","Stanotte è arrivato un *temporale* fortissimo.","Last night a very strong thunderstorm arrived."],
+["Level 2","la temperatura","the temperature","La *temperatura* scende sotto zero stanotte.","The temperature drops below zero tonight."],
+["Level 2","il grado","the degree","Oggi ci sono trenta *gradi*!","Today it is thirty degrees!"],
+["Level 2","la primavera","the spring","In *primavera* fioriscono i ciliegi.","In spring the cherry trees bloom."],
+["Level 2","l'estate","the summer","D'*estate* andiamo sempre al mare.","In summer we always go to the seaside."],
+["Level 2","l'autunno","the autumn","In *autunno* le foglie diventano rosse.","In autumn the leaves turn red."],
+["Level 2","l'inverno","the winter","D'*inverno* fa buio alle cinque.","In winter it gets dark at five."],
+["Level 2","piovere","to rain","Inizia a *piovere*, apri l'ombrello!","It is starting to rain, open the umbrella!"],
+["Level 2","nevicare","to snow","Domani potrebbe *nevicare* in collina.","Tomorrow it might snow in the hills."],
+["Level 2","l'ombrello","the umbrella","Ho dimenticato l'*ombrello* sul treno.","I forgot my umbrella on the train."],
+["Level 2","il clima","the climate","Il *clima* qui è mite tutto l'anno.","The climate here is mild all year."],
+["Level 2","i vestiti","the clothes","Stendo i *vestiti* sul balcone.","I hang the clothes on the balcony."],
+["Level 2","la maglietta","the t-shirt","Compro una *maglietta* bianca semplice.","I am buying a simple white t-shirt."],
+["Level 2","la camicia","the shirt","Per il colloquio metto la *camicia*.","For the interview I will wear a shirt."],
+["Level 2","i pantaloni","the trousers","Questi *pantaloni* sono troppo lunghi.","These trousers are too long."],
+["Level 2","il vestito","the dress / suit","Che bel *vestito*! È nuovo?","What a nice dress! Is it new?"],
+["Level 2","la giacca","the jacket","Prendi la *giacca*, fa fresco stasera.","Take your jacket, it is chilly tonight."],
+["Level 2","il cappotto","the coat","A gennaio serve un *cappotto* pesante.","In January you need a heavy coat."],
+["Level 2","il maglione","the sweater","Questo *maglione* di lana è caldissimo.","This wool sweater is very warm."],
+["Level 2","le scarpe","the shoes","Mi servono *scarpe* comode per camminare.","I need comfortable shoes for walking."],
+["Level 2","gli occhiali","the glasses","Non trovo più gli *occhiali* da sole.","I cannot find my sunglasses anymore."],
+["Level 2","l'orologio","the watch / clock","Il mio *orologio* è avanti di cinque minuti.","My watch is five minutes fast."],
+["Level 2","indossare","to wear","Cosa pensi di *indossare* alla festa?","What are you planning to wear to the party?"],
+["Level 2","svegliarsi","to wake up","Odio *svegliarmi* presto il lunedì.","I hate waking up early on Mondays."],
+["Level 2","alzarsi","to get up","Devo *alzarmi* alle sei domani.","I have to get up at six tomorrow."],
+["Level 2","lavarsi","to wash (oneself)","Vado a *lavarmi* i denti.","I am going to brush my teeth."],
+["Level 2","vestirsi","to get dressed","Mi devo *vestire* in fretta, è tardi!","I have to get dressed quickly, it is late!"],
+["Level 2","dormire","to sleep","Nel weekend voglio solo *dormire*.","On the weekend I just want to sleep."],
+["Level 2","uscire","to go out","Stasera usciamo? Dai, *usciamo*!","Are we going out tonight? Come on, let us go out!"],
+["Level 2","entrare","to enter","Si può *entrare* gratis al museo oggi.","You can enter the museum for free today."],
+["Level 2","cucinare","to cook","Mi rilassa *cucinare* la sera.","Cooking in the evening relaxes me."],
+["Level 2","preparare","to prepare","Devo *preparare* la cena per sei persone.","I have to prepare dinner for six people."],
+["Level 2","lavare","to wash","Devo *lavare* i piatti prima di uscire.","I have to wash the dishes before going out."],
+["Level 2","pulire","to clean","Sabato dobbiamo *pulire* l'appartamento.","On Saturday we have to clean the apartment."],
+["Level 2","ordinare","to order","Possiamo *ordinare*? Abbiamo fretta.","Can we order? We are in a hurry."],
+["Level 2","prenotare","to book / reserve","Vorrei *prenotare* un tavolo per due.","I would like to book a table for two."],
+["Level 2","portare","to bring / carry","Posso *portare* qualcosa per la cena?","Can I bring something for the dinner?"],
+["Level 2","usare","to use","Posso *usare* il tuo caricabatterie?","Can I use your charger?"],
+["Level 2","camminare","to walk","Mi piace *camminare* lungo il fiume.","I like walking along the river."],
+["Level 2","girare","to turn / go around","Devi *girare* a sinistra alla chiesa.","You have to turn left at the church."],
+["Level 2","attraversare","to cross","*Attraversare* qui è pericoloso.","Crossing here is dangerous."],
+["Level 2","perdere","to lose / miss","Non voglio *perdere* il treno!","I do not want to miss the train!"],
+["Level 2","dimenticare","to forget","Non *dimenticare* le chiavi!","Do not forget the keys!"],
+["Level 2","ricordare","to remember","Mi puoi *ricordare* l'indirizzo?","Can you remind me of the address?"],
+["Level 2","riposare","to rest","Domenica voglio solo *riposare*.","On Sunday I just want to rest."],
+["Level 2","avere fame","to be hungry","Dopo la palestra ho sempre *fame*.","After the gym I am always hungry."],
+["Level 2","avere sete","to be thirsty","Con questo caldo ho *sete* continua.","In this heat I am constantly thirsty."],
+["Level 2","avere sonno","to be sleepy","Dopo pranzo ho sempre *sonno*.","After lunch I am always sleepy."],
+["Level 2","fare la spesa","to do groceries","Sabato mattina faccio la *spesa* al mercato.","Saturday morning I do groceries at the market."],
+["Level 2","la pausa","the break","Facciamo una *pausa* di dieci minuti.","Let us take a ten-minute break."],
+["Level 2","presto","early / soon","Domani devo alzarmi *presto*.","Tomorrow I have to get up early."],
+["Level 2","tardi","late","È *tardi*, andiamo a dormire.","It is late, let us go to sleep."],
+["Level 2","la fretta","the hurry","Scusa, ho *fretta*: parliamo dopo!","Sorry, I am in a hurry: let us talk later!"],
+["Level 2","il pronto soccorso","emergency room","Per fortuna il *pronto soccorso* era vicino.","Luckily the emergency room was close."],
+["Level 2","la farmacia","the pharmacy","La *farmacia* di turno è aperta di notte.","The on-duty pharmacy is open at night."],
+["Level 2","il panino","the sandwich","A pranzo prendo un *panino* al volo.","For lunch I grab a quick sandwich."],
+["Level 2","il bar","the café / bar","Ci vediamo al *bar* della piazza.","See you at the café on the square."],
+["Level 2","il ristorante","the restaurant","Questo *ristorante* fa il pesce benissimo.","This restaurant does fish very well."],
+["Level 2","la pizzeria","the pizzeria","La *pizzeria* qui sotto usa il forno a legna.","The pizzeria downstairs uses a wood oven."],
+["Level 2","il menu","the menu","Il *menu* del giorno costa dodici euro.","The menu of the day costs twelve euros."],
+["Level 2","il primo","the first course","Di *primo* prendo gli spaghetti alle vongole.","For the first course I will have spaghetti with clams."],
+["Level 2","il secondo","the second course","Di *secondo* c'è pesce o carne.","For the main course there is fish or meat."],
+["Level 2","dolce","sweet","Questo vino è troppo *dolce* per me.","This wine is too sweet for me."],
+["Level 2","salato","salty / savory","Preferisco la colazione *salata*.","I prefer a savory breakfast."],
+["Level 2","fresco","fresh / cool","Il pesce qui è sempre *fresco*.","The fish here is always fresh."],
+["Level 2","vuoto","empty","Il frigo è *vuoto*, facciamo la spesa.","The fridge is empty, let us do groceries."],
+["Level 2","pieno","full","Il bus delle otto è sempre *pieno*.","The eight o'clock bus is always full."],
+["Level 2","sporco","dirty","Il pavimento è *sporco*, lo lavo io.","The floor is dirty, I will wash it."],
+["Level 2","pulito","clean","Le lenzuola sono *pulite* e profumate.","The sheets are clean and fragrant."],
+["Level 2","comodo","comfortable / convenient","Questo divano è davvero *comodo*.","This sofa is really comfortable."],
+["Level 2","la sveglia","the alarm clock","La *sveglia* suona alle sei e mezza.","The alarm rings at half past six."],
+["Level 2","l'asciugamano","the towel","Prendo un *asciugamano* pulito per la doccia.","I take a clean towel for the shower."],
+["Level 2","la spazzatura","the trash","Stasera porto fuori la *spazzatura*.","Tonight I take out the trash."],
+["Level 2","il quartiere","the neighborhood","Il mio *quartiere* è pieno di localini.","My neighborhood is full of little spots."],
+["Level 2","la piazza","the square","La *piazza* si riempie il sabato sera.","The square fills up on Saturday evenings."],
+["Level 2","il fiume","the river","Il *fiume* attraversa tutta la città.","The river crosses the whole city."],
+["Level 2","il parco","the park","Corro nel *parco* ogni mattina.","I run in the park every morning."],
+["Level 2","la chiesa","the church","La *chiesa* del paese è del Trecento.","The village church is from the fourteenth century."],
+["Level 2","il museo","the museum","Il *museo* è gratis la prima domenica del mese.","The museum is free on the first Sunday of the month."],
+["Level 2","il centro","the center / downtown","Stasera andiamo in *centro* a piedi.","Tonight we walk downtown."],
+["Level 2","la periferia","the outskirts","L'affitto in *periferia* costa meno.","Rent in the outskirts costs less."],
+["Level 2","l'indirizzo","the address","Mandami l'*indirizzo* della festa.","Send me the address of the party."],
+["Level 2","la mappa","the map","Senza *mappa* mi perdo subito.","Without a map I get lost right away."],
+["Level 2","il chilo","the kilo","Un *chilo* di mele, per favore.","A kilo of apples, please."],
+["Level 2","il pezzo","the piece","Un *pezzo* di pizza al taglio, grazie.","A slice of pizza by the cut, thanks."],
+["Level 2","mezzogiorno","noon","A *mezzogiorno* la mensa si riempie.","At noon the canteen fills up."],
+["Level 2","mezzanotte","midnight","Il bus notturno passa dopo *mezzanotte*.","The night bus comes after midnight."],
+["Level 2","stasera","tonight / this evening","*Stasera* facciamo una passeggiata?","Shall we take a walk tonight?"],
+/* ===== Level 3 · People & conversation (200) ===== */
+["Level 3","la famiglia","the family","La mia *famiglia* vive lontano da qui.","My family lives far from here."],
+["Level 3","il padre","the father","Mio *padre* cucina meglio di mia madre.","My father cooks better than my mother."],
+["Level 3","la madre","the mother","Mia *madre* mi scrive ogni giorno.","My mother writes to me every day."],
+["Level 3","i genitori","the parents","I miei *genitori* vengono a trovarmi a maggio.","My parents are coming to visit me in May."],
+["Level 3","il fratello","the brother","Mio *fratello* è più grande di me.","My brother is older than me."],
+["Level 3","la sorella","the sister","Mia *sorella* studia a Bologna.","My sister studies in Bologna."],
+["Level 3","il figlio","the son","Il loro *figlio* ha appena iniziato la scuola.","Their son has just started school."],
+["Level 3","la figlia","the daughter","La *figlia* dei vicini suona il violino.","The neighbors' daughter plays the violin."],
+["Level 3","il nonno","the grandfather","Il *nonno* racconta sempre storie della guerra.","Grandpa always tells stories about the war."],
+["Level 3","la nonna","the grandmother","La *nonna* fa la pasta a mano.","Grandma makes pasta by hand."],
+["Level 3","lo zio","the uncle","Lo *zio* Carlo vive in Germania.","Uncle Carlo lives in Germany."],
+["Level 3","la zia","the aunt","La *zia* ci porta sempre dolci.","Our aunt always brings us sweets."],
+["Level 3","il cugino","the cousin","Mio *cugino* ha la mia stessa età.","My cousin is the same age as me."],
+["Level 3","il marito","the husband","Suo *marito* lavora in ospedale.","Her husband works at the hospital."],
+["Level 3","la moglie","the wife","La *moglie* di Paolo è architetto.","Paolo's wife is an architect."],
+["Level 3","il matrimonio","the wedding / marriage","Il *matrimonio* è a giugno in campagna.","The wedding is in June in the countryside."],
+["Level 3","sposarsi","to get married","Vogliono *sposarsi* l'anno prossimo.","They want to get married next year."],
+["Level 3","il fidanzato","the boyfriend / fiancé","Il suo *fidanzato* è turco.","Her boyfriend is Turkish."],
+["Level 3","la fidanzata","the girlfriend / fiancée","Presento la mia *fidanzata* ai miei genitori.","I am introducing my girlfriend to my parents."],
+["Level 3","crescere","to grow (up)","I bambini *crescono* così in fretta!","Children grow up so fast!"],
+["Level 3","nascere","to be born","Dove sei *nata*, Aruna?","Where were you born, Aruna?"],
+["Level 3","i giovani","the young people","I *giovani* escono il sabato sera.","Young people go out on Saturday nights."],
+["Level 3","l'età","the age","Che *età* ha il tuo cane?","How old is your dog?"],
+["Level 3","l'amico","the friend (male)","Un *amico* mi aiuta con il trasloco.","A friend is helping me with the move."],
+["Level 3","l'amica","the friend (female)","La mia *amica* arriva stasera da Istanbul.","My friend arrives tonight from Istanbul."],
+["Level 3","il collega","the colleague","Un *collega* mi ha prestato il libro.","A colleague lent me the book."],
+["Level 3","la persona","the person","È una *persona* molto gentile.","He is a very kind person."],
+["Level 3","il carattere","the character / personality","Il cane ha un *carattere* dolcissimo.","The dog has a very sweet personality."],
+["Level 3","il rapporto","the relationship","Ho un buon *rapporto* con i miei coinquilini.","I have a good relationship with my flatmates."],
+["Level 3","l'amore","the love","L'*amore* per il cibo unisce gli italiani.","The love of food unites Italians."],
+["Level 3","l'amicizia","the friendship","La nostra *amicizia* dura da dieci anni.","Our friendship has lasted ten years."],
+["Level 3","fidarsi","to trust","Mi *fido* completamente di te.","I trust you completely."],
+["Level 3","litigare","to argue / fight","Non voglio *litigare* per una sciocchezza.","I do not want to argue over something silly."],
+["Level 3","fare pace","to make up / make peace","Dopo la lite abbiamo fatto *pace* subito.","After the fight we made up right away."],
+["Level 3","abbracciare","to hug","Voglio *abbracciare* il mio cane quando torno.","I want to hug my dog when I get back."],
+["Level 3","l'abbraccio","the hug","Un *abbraccio* forte e a presto!","A big hug and see you soon!"],
+["Level 3","il bacio","the kiss","Un *bacio* sulla guancia per salutare.","A kiss on the cheek to say hello."],
+["Level 3","salutare","to greet / say hi","Passo solo a *salutare* la nonna.","I am just stopping by to say hi to grandma."],
+["Level 3","presentare","to introduce","Ti voglio *presentare* una persona speciale.","I want to introduce you to a special person."],
+["Level 3","invitare","to invite","Vorrei *invitare* tutta la classe alla festa.","I would like to invite the whole class to the party."],
+["Level 3","l'invito","the invitation","Hai ricevuto l'*invito* al matrimonio?","Did you receive the wedding invitation?"],
+["Level 3","la festa","the party","La *festa* di compleanno è sabato.","The birthday party is on Saturday."],
+["Level 3","felice","happy","Sono *felice* di vederti!","I am happy to see you!"],
+["Level 3","triste","sad","Il film era bello ma *triste*.","The movie was good but sad."],
+["Level 3","arrabbiato","angry","Sei ancora *arrabbiato* con me?","Are you still angry with me?"],
+["Level 3","nervoso","nervous","Prima dell'esame sono sempre *nervosa*.","Before an exam I am always nervous."],
+["Level 3","tranquillo","calm","Stai *tranquillo*, andrà tutto bene.","Stay calm, everything will be fine."],
+["Level 3","preoccupato","worried","Sono *preoccupata* per l'esame di domani.","I am worried about tomorrow's exam."],
+["Level 3","sorpreso","surprised","Sono *sorpresa* dal tuo italiano!","I am surprised by your Italian!"],
+["Level 3","annoiato","bored","Il pubblico sembrava *annoiato*.","The audience seemed bored."],
+["Level 3","emozionato","excited / moved","Sono *emozionata* per il primo giorno.","I am excited about the first day."],
+["Level 3","innamorato","in love","È *innamorato* della sua città.","He is in love with his city."],
+["Level 3","geloso","jealous","Il gatto è *geloso* del cane.","The cat is jealous of the dog."],
+["Level 3","fiero","proud","Sono *fiera* dei miei progressi.","I am proud of my progress."],
+["Level 3","la paura","the fear","Ho *paura* dei ragni.","I am afraid of spiders."],
+["Level 3","la rabbia","the anger","Conto fino a dieci quando sento *rabbia*.","I count to ten when I feel anger."],
+["Level 3","lo stress","the stress","Lo *stress* degli esami si fa sentire.","Exam stress is making itself felt."],
+["Level 3","stressato","stressed","Sei troppo *stressato*, riposati un po'.","You are too stressed, rest a bit."],
+["Level 3","ridere","to laugh","Con voi non smetto mai di *ridere*.","With you I never stop laughing."],
+["Level 3","piangere","to cry","Il finale mi ha fatto *piangere*.","The ending made me cry."],
+["Level 3","sorridere","to smile","Il cane sembra *sorridere* nelle foto.","The dog seems to smile in photos."],
+["Level 3","il sorriso","the smile","Il suo *sorriso* è contagioso.","Her smile is contagious."],
+["Level 3","l'umore","the mood","Oggi sono di buon *umore*.","Today I am in a good mood."],
+["Level 3","sentirsi","to feel","Come ti *senti* oggi? Meglio?","How do you feel today? Better?"],
+["Level 3","la speranza","the hope","La *speranza* è l'ultima a morire.","Hope is the last to die."],
+["Level 3","sperare","to hope","*Spero* di passare l'esame.","I hope to pass the exam."],
+["Level 3","mancare","to miss / be missing","Mi *manca* il mare della mia città.","I miss the sea of my hometown."],
+["Level 3","il corpo","the body","Lo sport fa bene al *corpo* e alla mente.","Sport is good for the body and the mind."],
+["Level 3","la testa","the head","Ho mal di *testa* da stamattina.","I have had a headache since this morning."],
+["Level 3","i capelli","the hair","Aruna ha i *capelli* lunghi e scuri.","Aruna has long dark hair."],
+["Level 3","l'occhio","the eye","Ho qualcosa nell'*occhio*.","I have something in my eye."],
+["Level 3","l'orecchio","the ear","Il cane alza un *orecchio* quando lo chiamo.","The dog raises one ear when I call him."],
+["Level 3","il naso","the nose","Pıtırcık ha un piccolo *naso* nero.","Pıtırcık has a little black nose."],
+["Level 3","la bocca","the mouth","Non parlare con la *bocca* piena!","Do not talk with your mouth full!"],
+["Level 3","il dente","the tooth","Mi fa male un *dente*, vado dal dentista.","A tooth hurts, I am going to the dentist."],
+["Level 3","la gola","the throat","Ho mal di *gola* da ieri.","I have had a sore throat since yesterday."],
+["Level 3","il braccio","the arm","Mi sono fatta male al *braccio* in palestra.","I hurt my arm at the gym."],
+["Level 3","la mano","the hand","Ci diamo la *mano* per presentarci.","We shake hands to introduce ourselves."],
+["Level 3","la gamba","the leg","Dopo la corsa mi fanno male le *gambe*.","After the run my legs hurt."],
+["Level 3","il piede","the foot","Andiamo in centro a *piedi*?","Shall we walk downtown on foot?"],
+["Level 3","la schiena","the back","Studiare piegati fa male alla *schiena*.","Studying hunched over is bad for your back."],
+["Level 3","la pancia","the belly","Pıtırcık adora i grattini sulla *pancia*.","Pıtırcık loves belly rubs."],
+["Level 3","il cuore","the heart","Correre fa bene al *cuore*.","Running is good for the heart."],
+["Level 3","la salute","the health","La *salute* viene prima di tutto.","Health comes before everything."],
+["Level 3","malato","sick / ill","Resto a casa, sono *malata*.","I am staying home, I am sick."],
+["Level 3","sano","healthy","Mangiare *sano* non è difficile.","Eating healthy is not difficult."],
+["Level 3","il raffreddore","the cold (illness)","Con questo *raffreddore* non sento i sapori.","With this cold I cannot taste anything."],
+["Level 3","la febbre","the fever","Ho la *febbre* a trentotto e mezzo.","I have a fever of thirty-eight and a half."],
+["Level 3","la tosse","the cough","Questa *tosse* non passa da una settimana.","This cough has not gone away for a week."],
+["Level 3","il dolore","the pain","Sento un *dolore* alla spalla.","I feel a pain in my shoulder."],
+["Level 3","fare male","to hurt","Mi fa *male* la testa, vado a riposare.","My head hurts, I am going to rest."],
+["Level 3","il medico","the doctor","Il *medico* riceve dalle nove alle dodici.","The doctor sees patients from nine to twelve."],
+["Level 3","l'ospedale","the hospital","L'*ospedale* nuovo è fuori città.","The new hospital is outside the city."],
+["Level 3","la medicina","the medicine","Prendo la *medicina* dopo i pasti.","I take the medicine after meals."],
+["Level 3","la ricetta","the prescription / recipe","Per questo farmaco serve la *ricetta*.","For this drug you need a prescription."],
+["Level 3","l'appuntamento","the appointment / date","Ho un *appuntamento* dal dentista alle tre.","I have a dentist appointment at three."],
+["Level 3","il tempo libero","the free time","Nel *tempo libero* dipingo e leggo.","In my free time I paint and read."],
+["Level 3","l'hobby","the hobby","Il mio *hobby* preferito è la fotografia.","My favorite hobby is photography."],
+["Level 3","lo sport","the sport","Che *sport* fai per tenerti in forma?","What sport do you do to stay fit?"],
+["Level 3","il calcio","the football / soccer","In Italia il *calcio* è una religione.","In Italy football is a religion."],
+["Level 3","la partita","the match / game","Guardiamo la *partita* al bar stasera?","Shall we watch the match at the bar tonight?"],
+["Level 3","la squadra","the team","La mia *squadra* ha vinto ieri!","My team won yesterday!"],
+["Level 3","giocare","to play","I cani amano *giocare* con la palla.","Dogs love playing with the ball."],
+["Level 3","vincere","to win","Per *vincere* serve allenamento.","To win you need training."],
+["Level 3","la palestra","the gym","Vado in *palestra* tre volte a settimana.","I go to the gym three times a week."],
+["Level 3","l'allenamento","the training / workout","L'*allenamento* di oggi era durissimo.","Today's workout was really tough."],
+["Level 3","allenarsi","to train / work out","Mi *alleno* la mattina presto.","I work out early in the morning."],
+["Level 3","correre","to run","Andiamo a *correre* lungo il fiume?","Shall we go running along the river?"],
+["Level 3","nuotare","to swim","D'estate vado a *nuotare* ogni giorno.","In summer I go swimming every day."],
+["Level 3","la piscina","the swimming pool","La *piscina* comunale apre alle sette.","The public pool opens at seven."],
+["Level 3","ballare","to dance","Stasera andiamo a *ballare* in centro!","Tonight we are going dancing downtown!"],
+["Level 3","cantare","to sing","Mi piace *cantare* sotto la doccia.","I like singing in the shower."],
+["Level 3","la canzone","the song","Questa *canzone* mi ricorda l'estate.","This song reminds me of summer."],
+["Level 3","la musica","the music","La *musica* italiana anni sessanta è magica.","Italian music from the sixties is magical."],
+["Level 3","il concerto","the concert","Il *concerto* è all'aperto, in piazza.","The concert is outdoors, in the square."],
+["Level 3","suonare","to play (an instrument)","So *suonare* un po' la chitarra.","I can play the guitar a little."],
+["Level 3","leggere","to read","Amo *leggere* sul balcone la sera.","I love reading on the balcony in the evening."],
+["Level 3","il romanzo","the novel","Sto leggendo un *romanzo* italiano.","I am reading an Italian novel."],
+["Level 3","il film","the movie","Il *film* inizia alle nove meno un quarto.","The movie starts at a quarter to nine."],
+["Level 3","il cinema","the cinema","Al *cinema* all'aperto danno un classico.","The open-air cinema is showing a classic."],
+["Level 3","la serie","the series","Abbiamo finito la *serie* in due giorni.","We finished the series in two days."],
+["Level 3","il teatro","the theater","Il *teatro* dell'opera è bellissimo.","The opera theater is beautiful."],
+["Level 3","il gioco","the game","Il *gioco* preferito del cane è il riporto.","The dog's favorite game is fetch."],
+["Level 3","i videogiochi","the video games","La sera giochiamo ai *videogiochi* insieme.","In the evening we play video games together."],
+["Level 3","la foto","the photo","Facciamo una *foto* tutti insieme!","Let us take a photo all together!"],
+["Level 3","disegnare","to draw","Mi rilassa *disegnare* nei caffè.","Drawing in cafés relaxes me."],
+["Level 3","la passeggiata","the walk / stroll","Facciamo una *passeggiata* dopo cena?","Shall we take a stroll after dinner?"],
+["Level 3","la vacanza","the holiday / vacation","Quest'anno niente *vacanza*, purtroppo.","No vacation this year, unfortunately."],
+["Level 3","il mare","the sea","Il *mare* d'inverno ha un fascino speciale.","The sea in winter has a special charm."],
+["Level 3","la montagna","the mountain","In *montagna* l'aria è più fresca.","In the mountains the air is cooler."],
+["Level 3","la spiaggia","the beach","La *spiaggia* è piena già alle nove.","The beach is already full at nine."],
+["Level 3","il lago","the lake","Il *lago* di Como è famoso nel mondo.","Lake Como is famous worldwide."],
+["Level 3","il cane","the dog","Il *cane* bianco si chiama Pıtırcık.","The white dog is called Pıtırcık."],
+["Level 3","il gatto","the cat","Il *gatto* dorme sul davanzale.","The cat sleeps on the windowsill."],
+["Level 3","l'animale","the animal","Qual è il tuo *animale* preferito?","What is your favorite animal?"],
+["Level 3","portare a spasso","to take for a walk","Porto a *spasso* il cane due volte al giorno.","I take the dog for a walk twice a day."],
+["Level 3","accarezzare","to pet / stroke","Posso *accarezzare* il tuo cane?","May I pet your dog?"],
+["Level 3","raccontare","to tell (a story)","Nonna, ci puoi *raccontare* una storia?","Grandma, can you tell us a story?"],
+["Level 3","spiegare","to explain","Mi puoi *spiegare* questa regola?","Can you explain this rule to me?"],
+["Level 3","chiedere","to ask","Posso *chiedere* un favore?","May I ask a favor?"],
+["Level 3","rispondere","to answer","Non so cosa *rispondere* a questa domanda.","I do not know what to answer to this question."],
+["Level 3","ascoltare","to listen","Mi piace *ascoltare* i podcast in treno.","I like listening to podcasts on the train."],
+["Level 3","guardare","to watch / look at","Stasera vogliamo *guardare* un film.","Tonight we want to watch a movie."],
+["Level 3","incontrare","to meet","Spero di *incontrare* gente nuova al corso.","I hope to meet new people at the course."],
+["Level 3","l'incontro","the meeting / encounter","L'*incontro* con il professore è alle due.","The meeting with the professor is at two."],
+["Level 3","chiacchierare","to chat","Restiamo a *chiacchierare* fino a tardi.","We stay up chatting until late."],
+["Level 3","la chiacchierata","the chat","Una bella *chiacchierata* davanti a un caffè.","A nice chat over a coffee."],
+["Level 3","discutere","to discuss / argue","Possiamo *discutere* del progetto domani?","Can we discuss the project tomorrow?"],
+["Level 3","scherzare","to joke","Dai, sto solo *scherzando*!","Come on, I am only joking!"],
+["Level 3","lo scherzo","the joke / prank","Era solo uno *scherzo*, non ti arrabbiare.","It was just a joke, do not get angry."],
+["Level 3","mentire","to lie","Non so *mentire*: si vede subito.","I cannot lie: it shows immediately."],
+["Level 3","la bugia","the lie","Una piccola *bugia* a volte scappa.","A little lie slips out sometimes."],
+["Level 3","la verità","the truth","Dimmi la *verità*: ti piace?","Tell me the truth: do you like it?"],
+["Level 3","promettere","to promise","Ti *prometto* che arrivo puntuale.","I promise you I will arrive on time."],
+["Level 3","la promessa","the promise","Una *promessa* è una promessa.","A promise is a promise."],
+["Level 3","consigliare","to advise / recommend","Mi puoi *consigliare* un ristorante?","Can you recommend a restaurant?"],
+["Level 3","il consiglio","the advice","Ho seguito il tuo *consiglio*: grazie!","I followed your advice: thank you!"],
+["Level 3","essere d'accordo","to agree","Su questo siamo tutti d'*accordo*.","On this we all agree."],
+["Level 3","simpatico","nice / likeable","Il tuo coinquilino è davvero *simpatico*.","Your flatmate is really nice."],
+["Level 3","antipatico","unpleasant / unlikeable","Sembrava *antipatico*, invece è timido.","He seemed unpleasant, but he is just shy."],
+["Level 3","gentile","kind","La signora del bar è sempre *gentile*.","The lady at the café is always kind."],
+["Level 3","divertente","funny / fun","La serata è stata davvero *divertente*.","The evening was really fun."],
+["Level 3","noioso","boring","Il documentario era un po' *noioso*.","The documentary was a bit boring."],
+["Level 3","intelligente","intelligent","Il pumi è un cane molto *intelligente*.","The pumi is a very intelligent dog."],
+["Level 3","stupido","stupid","È stata una domanda *stupida*, scusa.","It was a stupid question, sorry."],
+["Level 3","timido","shy","Il cucciolo è *timido* con gli sconosciuti.","The puppy is shy with strangers."],
+["Level 3","socievole","sociable","Aruna è *socievole* e fa amicizia subito.","Aruna is sociable and makes friends right away."],
+["Level 3","serio","serious","Il professore sembra *serio* ma è simpatico.","The professor seems serious but he is nice."],
+["Level 3","strano","strange / weird","Che rumore *strano* fa la lavatrice!","What a strange noise the washing machine makes!"],
+["Level 3","famoso","famous","Questo caffè è *famoso* per il tiramisù.","This café is famous for its tiramisu."],
+["Level 3","carino","cute / nice","Che cucciolo *carino*!","What a cute puppy!"],
+["Level 3","morbido","soft / fluffy","Il pelo del cane è *morbido* come il cotone.","The dog's fur is as soft as cotton."],
+["Level 3","alto","tall / high","Mio fratello è *alto* un metro e novanta.","My brother is one meter ninety tall."],
+["Level 3","basso","short / low","Il tavolino è troppo *basso* per studiare.","The little table is too low for studying."],
+["Level 3","magro","thin / slim","Il gatto randagio era *magro* magro.","The stray cat was very thin."],
+["Level 3","forte","strong","Il caffè italiano è *forte* ma buono.","Italian coffee is strong but good."],
+["Level 3","debole","weak","Dopo l'influenza mi sento *debole*.","After the flu I feel weak."],
+["Level 3","biondo","blond","Da bambina ero *bionda*.","As a child I was blonde."],
+["Level 3","la barba","the beard","Mio padre si è tagliato la *barba*.","My father shaved off his beard."],
+["Level 3","gli occhi","the eyes","Aruna ha gli *occhi* castani.","Aruna has brown eyes."],
+["Level 3","conoscersi","to know each other / meet","Ci *conosciamo* da dieci anni.","We have known each other for ten years."],
+["Level 3","vedersi","to see each other","Ci *vediamo* domani alle otto?","Shall we see each other tomorrow at eight?"],
+["Level 3","sentirsi al telefono","to talk (by phone)","Ci *sentiamo* stasera dopo cena!","We will talk tonight after dinner!"],
+["Level 3","frequentarsi","to date / hang out","Si *frequentano* da qualche mese.","They have been dating for a few months."],
+["Level 3","uscire insieme","to go out together","Usciamo *insieme* sabato sera?","Shall we go out together Saturday night?"],
+["Level 3","innamorarsi","to fall in love","È facile *innamorarsi* di questa città.","It is easy to fall in love with this city."],
+["Level 3","il segreto","the secret","Ti racconto un *segreto*: non dirlo!","I will tell you a secret: do not tell!"],
+["Level 3","gli auguri","the (good) wishes","Tanti *auguri* per i tuoi vent'anni!","Best wishes for your twentieth birthday!"],
+["Level 3","il dentista","the dentist","Domani ho il *dentista*, che ansia.","Tomorrow I have the dentist, how stressful."],
+["Level 3","l'allergia","the allergy","Ho un'*allergia* ai pollini.","I have a pollen allergy."],
+["Level 3","prendersi cura","to take care of","Mi piace *prendermi cura* delle piante.","I like taking care of plants."],
+["Level 3","rilassarsi","to relax","Nel weekend voglio solo *rilassarmi*.","On the weekend I just want to relax."],
+["Level 3","divertirsi","to have fun","L'importante è *divertirsi*!","The important thing is to have fun!"],
+["Level 3","annoiarsi","to get bored","Con Pıtırcık è impossibile *annoiarsi*.","With Pıtırcık it is impossible to get bored."],
+["Level 3","arrabbiarsi","to get angry","Non *arrabbiarti* per così poco!","Do not get angry over so little!"],
+["Level 3","preoccuparsi","to worry","Non ti *preoccupare*, ci penso io.","Do not worry, I will take care of it."],
+["Level 3","ricordarsi","to remember","Ti *ricordi* il nostro primo viaggio?","Do you remember our first trip?"],
+["Level 3","dimenticarsi","to forget","Mi sono *dimenticata* del suo compleanno!","I forgot his birthday!"],
+["Level 3","abituarsi","to get used to","Mi sto *abituando* alla vita italiana.","I am getting used to Italian life."],
+["Level 3","trasferirsi","to move (relocate)","Vorrei *trasferirmi* vicino al mare.","I would like to move close to the sea."],
+/* ===== Level 4 · Student life (200) ===== */
+["Level 4","l'università","the university","L'*università* di Bologna è la più antica d'Europa.","The University of Bologna is the oldest in Europe."],
+["Level 4","la facoltà","the faculty / department","La *facoltà* di lettere è in centro.","The faculty of humanities is in the center."],
+["Level 4","il corso","the course","Il *corso* di italiano inizia lunedì.","The Italian course starts on Monday."],
+["Level 4","la lezione","the lesson / lecture","La *lezione* di oggi è in aula magna.","Today's lecture is in the main hall."],
+["Level 4","il professore","the professor","Il *professore* spiega con molti esempi.","The professor explains with many examples."],
+["Level 4","lo studente","the student (male)","Ogni *studente* riceve un account universitario.","Every student receives a university account."],
+["Level 4","la studentessa","the student (female)","La *studentessa* fa una domanda interessante.","The student asks an interesting question."],
+["Level 4","la matricola","the freshman / student ID number","Da *matricola* tutto sembra complicato.","As a freshman everything seems complicated."],
+["Level 4","l'esame","the exam","L'*esame* scritto dura tre ore.","The written exam lasts three hours."],
+["Level 4","il voto","the grade / mark","Ho preso un bel *voto* in storia!","I got a good grade in history!"],
+["Level 4","la laurea","the degree","Festeggiamo la *laurea* di Sara giovedì.","We are celebrating Sara's graduation on Thursday."],
+["Level 4","laurearsi","to graduate","Vorrei *laurearmi* in tempo.","I would like to graduate on time."],
+["Level 4","la tesi","the thesis","Scrivo la *tesi* sulla traduzione letteraria.","I am writing my thesis on literary translation."],
+["Level 4","il libro","the book","Questo *libro* di testo costa quaranta euro.","This textbook costs forty euros."],
+["Level 4","il quaderno","the notebook","Scrivo i vocaboli su un *quaderno*.","I write the vocabulary in a notebook."],
+["Level 4","la penna","the pen","Mi presti una *penna* per il modulo?","Can you lend me a pen for the form?"],
+["Level 4","la matita","the pencil","Sottolineo a *matita*, così posso cancellare.","I underline in pencil, so I can erase."],
+["Level 4","gli appunti","the notes","Mi passi gli *appunti* di ieri?","Can you pass me yesterday's notes?"],
+["Level 4","l'aula","the classroom","L'*aula* tre è al piano terra.","Room three is on the ground floor."],
+["Level 4","la biblioteca","the library","La *biblioteca* è aperta fino a mezzanotte.","The library is open until midnight."],
+["Level 4","la mensa","the canteen","In *mensa* il pranzo costa cinque euro.","At the canteen lunch costs five euros."],
+["Level 4","il campus","the campus","Il *campus* ha anche un cinema.","The campus even has a cinema."],
+["Level 4","studiare","to study","Devo *studiare* tre capitoli per domani.","I have to study three chapters for tomorrow."],
+["Level 4","imparare","to learn","Si può *imparare* una lingua anche con le app.","You can learn a language with apps too."],
+["Level 4","insegnare","to teach","Mi piacerebbe *insegnare* un giorno.","I would like to teach one day."],
+["Level 4","ripassare","to review / revise","Stasera devo *ripassare* per il test.","Tonight I have to review for the test."],
+["Level 4","l'esercizio","the exercise","L'*esercizio* numero due è difficile.","Exercise number two is difficult."],
+["Level 4","il compito","the homework / task","Il *compito* va consegnato entro venerdì.","The homework must be handed in by Friday."],
+["Level 4","la pagina","the page","Aprite il libro a *pagina* cinquanta.","Open the book to page fifty."],
+["Level 4","il capitolo","the chapter","Il terzo *capitolo* è il più interessante.","The third chapter is the most interesting."],
+["Level 4","il testo","the text","Leggete il *testo* e rispondete alle domande.","Read the text and answer the questions."],
+["Level 4","il dizionario","the dictionary","Uso un *dizionario* online gratuito.","I use a free online dictionary."],
+["Level 4","la traduzione","the translation","La *traduzione* di questa frase è difficile.","The translation of this sentence is difficult."],
+["Level 4","tradurre","to translate","Puoi *tradurre* questa email in italiano?","Can you translate this email into Italian?"],
+["Level 4","l'errore","the mistake","Dagli *errori* si impara molto.","You learn a lot from mistakes."],
+["Level 4","correggere","to correct","La professoressa deve ancora *correggere* i test.","The professor still has to correct the tests."],
+["Level 4","la grammatica","the grammar","La *grammatica* italiana ha molte eccezioni.","Italian grammar has many exceptions."],
+["Level 4","il significato","the meaning","Qual è il *significato* di questa parola?","What is the meaning of this word?"],
+["Level 4","significare","to mean","Cosa può *significare* questo simbolo?","What can this symbol mean?"],
+["Level 4","l'esempio","the example","Mi fai un *esempio* concreto?","Can you give me a concrete example?"],
+["Level 4","il progetto","the project","Il *progetto* di gruppo vale metà voto.","The group project is worth half the grade."],
+["Level 4","la presentazione","the presentation","Domani ho una *presentazione* in inglese.","Tomorrow I have a presentation in English."],
+["Level 4","la ricerca","the research","Faccio una *ricerca* per la tesi.","I am doing research for my thesis."],
+["Level 4","il gruppo","the group","Il nostro *gruppo* si trova in biblioteca.","Our group meets in the library."],
+["Level 4","la borsa di studio","the scholarship","Ho vinto una *borsa di studio* per merito!","I won a merit scholarship!"],
+["Level 4","l'iscrizione","the enrollment / registration","L'*iscrizione* scade il trenta settembre.","Enrollment closes on September thirtieth."],
+["Level 4","iscriversi","to enroll / sign up","Voglio *iscrivermi* al corso di cucina.","I want to sign up for the cooking course."],
+["Level 4","frequentare","to attend","Devo *frequentare* almeno il settanta per cento delle lezioni.","I have to attend at least seventy percent of the classes."],
+["Level 4","superare","to pass (an exam)","Spero di *superare* l'esame al primo tentativo.","I hope to pass the exam on the first try."],
+["Level 4","bocciare","to fail (someone)","Il professore non ama *bocciare* nessuno.","The professor does not like to fail anyone."],
+["Level 4","il semestre","the semester","Il secondo *semestre* inizia a febbraio.","The second semester starts in February."],
+["Level 4","la scadenza","the deadline","La *scadenza* per il progetto è vicina.","The deadline for the project is close."],
+["Level 4","consegnare","to hand in / deliver","Devo *consegnare* la tesina entro le sei.","I have to hand in the paper by six."],
+["Level 4","l'Erasmus","the Erasmus (exchange)","Con l'*Erasmus* puoi studiare all'estero un anno.","With Erasmus you can study abroad for a year."],
+["Level 4","la materia","the subject","Qual è la tua *materia* preferita?","What is your favorite subject?"],
+["Level 4","l'affitto","the rent","L'*affitto* è di cinquecento euro al mese.","The rent is five hundred euros a month."],
+["Level 4","affittare","to rent","Vorrei *affittare* una stanza in centro.","I would like to rent a room in the center."],
+["Level 4","il contratto","the contract","Leggi bene il *contratto* prima di firmare.","Read the contract carefully before signing."],
+["Level 4","il padrone di casa","the landlord","Il *padrone di casa* abita al piano di sotto.","The landlord lives downstairs."],
+["Level 4","l'inquilino","the tenant","L'*inquilino* precedente ha lasciato i mobili.","The previous tenant left the furniture."],
+["Level 4","il coinquilino","the flatmate (male)","Il mio *coinquilino* cucina benissimo.","My flatmate cooks very well."],
+["Level 4","la coinquilina","the flatmate (female)","La mia *coinquilina* studia medicina.","My flatmate studies medicine."],
+["Level 4","condividere","to share","Preferisco *condividere* l'appartamento che vivere sola.","I prefer sharing the apartment to living alone."],
+["Level 4","la bolletta","the utility bill","La *bolletta* della luce è arrivata altissima.","The electricity bill came in very high."],
+["Level 4","le spese","the expenses / utilities","Le *spese* sono incluse nell'affitto.","Utilities are included in the rent."],
+["Level 4","la caparra","the deposit","La *caparra* è di due mensilità.","The deposit is two months' rent."],
+["Level 4","il trasloco","the move (house)","Il *trasloco* è fissato per sabato.","The move is set for Saturday."],
+["Level 4","traslocare","to move house","Mi aiuti a *traslocare* questo weekend?","Will you help me move this weekend?"],
+["Level 4","arredato","furnished","Cerco un monolocale *arredato*.","I am looking for a furnished studio."],
+["Level 4","l'annuncio","the ad / listing","Ho risposto a un *annuncio* per una stanza.","I replied to an ad for a room."],
+["Level 4","la stanza","the room","La *stanza* è luminosa e silenziosa.","The room is bright and quiet."],
+["Level 4","il monolocale","the studio apartment","Un *monolocale* in centro costa troppo.","A studio in the center costs too much."],
+["Level 4","firmare","to sign","Devi *firmare* qui e qui.","You have to sign here and here."],
+["Level 4","la firma","the signature","Manca la tua *firma* sul contratto.","Your signature is missing on the contract."],
+["Level 4","il documento","the document","Porta un *documento* d'identità valido.","Bring a valid identity document."],
+["Level 4","il modulo","the form","Compila il *modulo* in stampatello.","Fill in the form in block letters."],
+["Level 4","la banca","the bank","La *banca* apre alle otto e trenta.","The bank opens at eight thirty."],
+["Level 4","il conto corrente","the bank account","Ho aperto un *conto corrente* per studenti.","I opened a student bank account."],
+["Level 4","la carta di credito","the credit card","La *carta di credito* non funziona online.","The credit card does not work online."],
+["Level 4","prelevare","to withdraw (cash)","Devo *prelevare* cinquanta euro.","I have to withdraw fifty euros."],
+["Level 4","il bonifico","the bank transfer","Pago l'affitto con un *bonifico* mensile.","I pay the rent by monthly bank transfer."],
+["Level 4","lo stipendio","the salary","Lo *stipendio* arriva il ventisette del mese.","The salary arrives on the twenty-seventh of the month."],
+["Level 4","il risparmio","the savings","I miei *risparmi* bastano per tre mesi.","My savings are enough for three months."],
+["Level 4","risparmiare","to save (money)","Cucinare a casa fa *risparmiare* molto.","Cooking at home saves a lot."],
+["Level 4","il budget","the budget","Il mio *budget* settimanale è di sessanta euro.","My weekly budget is sixty euros."],
+["Level 4","il prestito","the loan","Ho chiesto un *prestito* per il master.","I asked for a loan for my master's."],
+["Level 4","guadagnare","to earn","Con le ripetizioni si può *guadagnare* bene.","With tutoring you can earn well."],
+["Level 4","le tasse universitarie","the tuition fees","Le *tasse universitarie* dipendono dal reddito.","Tuition fees depend on income."],
+["Level 4","la rata","the installment","Pago le tasse in tre *rate*.","I pay the fees in three installments."],
+["Level 4","il costo","the cost","Il *costo* della vita qui è alto.","The cost of living here is high."],
+["Level 4","la carta d'identità","the ID card","La mia *carta d'identità* scade a luglio.","My ID card expires in July."],
+["Level 4","il codice fiscale","the tax code","Per il contratto serve il *codice fiscale*.","For the contract you need the tax code."],
+["Level 4","il permesso di soggiorno","the residence permit","Ho rinnovato il *permesso di soggiorno*.","I renewed my residence permit."],
+["Level 4","la questura","the police headquarters","L'appuntamento in *questura* è alle nove.","The appointment at the police headquarters is at nine."],
+["Level 4","il comune","the town hall / municipality","Il *comune* rilascia il certificato di residenza.","The town hall issues the residence certificate."],
+["Level 4","la residenza","the residency","Devo registrare la *residenza* al comune.","I have to register my residency at the town hall."],
+["Level 4","il certificato","the certificate","Serve un *certificato* di iscrizione.","You need an enrollment certificate."],
+["Level 4","la tessera sanitaria","the health card","Con la *tessera sanitaria* il medico è gratuito.","With the health card the doctor is free."],
+["Level 4","il medico di base","the general practitioner","Ho scelto il *medico di base* vicino a casa.","I chose a general practitioner close to home."],
+["Level 4","l'ufficio","the office","L'*ufficio* riceve solo su appuntamento.","The office receives only by appointment."],
+["Level 4","lo sportello","the counter / desk","Lo *sportello* tre è per gli studenti stranieri.","Counter three is for international students."],
+["Level 4","la fila","the queue / line","C'è una *fila* lunghissima alla posta.","There is a very long queue at the post office."],
+["Level 4","la marca da bollo","the revenue stamp","Serve una *marca da bollo* da sedici euro.","You need a sixteen-euro revenue stamp."],
+["Level 4","richiedere","to request / apply for","Devo *richiedere* un nuovo certificato.","I have to request a new certificate."],
+["Level 4","la richiesta","the request / application","La *richiesta* va inviata online.","The application must be sent online."],
+["Level 4","compilare","to fill in","Puoi *compilare* il modulo a casa.","You can fill in the form at home."],
+["Level 4","allegare","to attach","Ricorda di *allegare* la fotocopia del passaporto.","Remember to attach a copy of your passport."],
+["Level 4","la fotocopia","the photocopy","Faccio una *fotocopia* del contratto.","I make a photocopy of the contract."],
+["Level 4","valido","valid","Il biglietto è *valido* per novanta minuti.","The ticket is valid for ninety minutes."],
+["Level 4","scaduto","expired","Il mio passaporto è *scaduto*!","My passport has expired!"],
+["Level 4","rinnovare","to renew","Devo *rinnovare* l'abbonamento del bus.","I have to renew my bus pass."],
+["Level 4","la posta","the post office / mail","Passo in *posta* a ritirare un pacco.","I am stopping by the post office to pick up a package."],
+["Level 4","il pacco","the package","Il *pacco* arriva tra due giorni.","The package arrives in two days."],
+["Level 4","la burocrazia","the bureaucracy","La *burocrazia* italiana è leggendaria.","Italian bureaucracy is legendary."],
+["Level 4","il lavoro","the work / job","Cerco un *lavoro* part-time per il weekend.","I am looking for a part-time job for the weekend."],
+["Level 4","lavorare","to work","*Lavorare* e studiare insieme è dura.","Working and studying at the same time is tough."],
+["Level 4","il lavoretto","the side job","Ho un *lavoretto* in una libreria.","I have a side job in a bookshop."],
+["Level 4","il colloquio","the (job) interview","Domani ho un *colloquio* per uno stage.","Tomorrow I have an interview for an internship."],
+["Level 4","il curriculum","the CV / resume","Aggiorno il *curriculum* con il nuovo corso.","I update my CV with the new course."],
+["Level 4","l'esperienza","the experience","Questa *esperienza* mi ha insegnato molto.","This experience taught me a lot."],
+["Level 4","lo stage","the internship","Lo *stage* dura sei mesi ed è pagato.","The internship lasts six months and is paid."],
+["Level 4","il capo","the boss","Il mio *capo* mi lascia studiare nei giorni d'esame.","My boss lets me study on exam days."],
+["Level 4","il turno","the shift","Faccio il *turno* di sera al bar.","I do the evening shift at the bar."],
+["Level 4","part-time","part-time","Un lavoro *part-time* mi lascia tempo per studiare.","A part-time job leaves me time to study."],
+["Level 4","assumere","to hire","Il ristorante vuole *assumere* due camerieri.","The restaurant wants to hire two waiters."],
+["Level 4","fare domanda","to apply","Voglio *fare domanda* per la borsa di studio.","I want to apply for the scholarship."],
+["Level 4","le ripetizioni","the tutoring (private lessons)","Do *ripetizioni* di matematica ai liceali.","I give math tutoring to high schoolers."],
+["Level 4","il computer","the computer","Il mio *computer* è lento la mattina.","My computer is slow in the morning."],
+["Level 4","il portatile","the laptop","Porto il *portatile* in biblioteca.","I take my laptop to the library."],
+["Level 4","il telefono","the phone","Il *telefono* squilla sempre a lezione, che figura!","The phone always rings in class, how embarrassing!"],
+["Level 4","il cellulare","the mobile phone","Ho lasciato il *cellulare* in modalità aereo.","I left my mobile on airplane mode."],
+["Level 4","lo schermo","the screen","Lo *schermo* del portatile è rotto.","The laptop screen is broken."],
+["Level 4","la stampante","the printer","La *stampante* della biblioteca è gratuita.","The library printer is free."],
+["Level 4","stampare","to print","Devo *stampare* venti pagine per domani.","I have to print twenty pages for tomorrow."],
+["Level 4","il file","the file","Ho perso il *file* della presentazione!","I lost the presentation file!"],
+["Level 4","la cartella","the folder","Salvo tutto nella *cartella* del corso.","I save everything in the course folder."],
+["Level 4","salvare","to save (a file)","Ricorda di *salvare* prima di chiudere!","Remember to save before closing!"],
+["Level 4","cancellare","to delete / erase","Ho *cancellato* la foto per sbaglio.","I deleted the photo by mistake."],
+["Level 4","scaricare","to download","Puoi *scaricare* le slide dal sito del corso.","You can download the slides from the course site."],
+["Level 4","caricare","to upload / load","Devo *caricare* la tesina sul portale.","I have to upload my paper to the portal."],
+["Level 4","l'applicazione","the application / app","Questa *applicazione* per le flashcard è fantastica.","This flashcard app is fantastic."],
+["Level 4","il sito","the website","Il *sito* dell'università è in manutenzione.","The university website is under maintenance."],
+["Level 4","internet","the internet","Senza *internet* non posso seguire la lezione.","Without internet I cannot follow the class."],
+["Level 4","il wifi","the wifi","Il *wifi* del campus è velocissimo.","The campus wifi is very fast."],
+["Level 4","la password","the password","Ho dimenticato la *password* della mail.","I forgot my email password."],
+["Level 4","l'account","the account","Il mio *account* universitario scade dopo la laurea.","My university account expires after graduation."],
+["Level 4","l'email","the email","Ti mando i dettagli per *email*.","I will send you the details by email."],
+["Level 4","il messaggio","the message","Rispondo al tuo *messaggio* stasera.","I will reply to your message tonight."],
+["Level 4","mandare","to send","Ti *mando* la posizione sulla mappa.","I will send you the location on the map."],
+["Level 4","ricevere","to receive","Devo ancora *ricevere* la conferma.","I still have to receive the confirmation."],
+["Level 4","chiamare","to call","Ti *chiamo* dopo la lezione.","I will call you after class."],
+["Level 4","la chiamata","the (phone) call","Ho perso una *chiamata* di mia madre.","I missed a call from my mother."],
+["Level 4","la videochiamata","the video call","Facciamo una *videochiamata* di gruppo stasera.","We are doing a group video call tonight."],
+["Level 4","la batteria","the battery","La *batteria* dura mezza giornata ormai.","The battery lasts half a day by now."],
+["Level 4","il caricabatterie","the charger","Qualcuno ha un *caricabatterie* USB-C?","Does anyone have a USB-C charger?"],
+["Level 4","accendere","to turn on","Puoi *accendere* il proiettore?","Can you turn on the projector?"],
+["Level 4","spegnere","to turn off","Ricordati di *spegnere* il computer della lab.","Remember to turn off the lab computer."],
+["Level 4","funzionare","to work / function","Il microfono non vuole *funzionare*.","The microphone refuses to work."],
+["Level 4","rotto","broken","Il proiettore è *rotto* di nuovo.","The projector is broken again."],
+["Level 4","riparare","to repair","Devo far *riparare* lo schermo del telefono.","I have to get my phone screen repaired."],
+["Level 4","aggiornare","to update","Devo *aggiornare* l'app dell'università.","I have to update the university app."],
+["Level 4","l'aggiornamento","the update","L'*aggiornamento* ha risolto il problema.","The update fixed the problem."],
+["Level 4","il link","the link","Il *link* della riunione non funziona.","The meeting link does not work."],
+["Level 4","cliccare","to click","Devi *cliccare* sul pulsante verde.","You have to click the green button."],
+["Level 4","la rete","the network","La *rete* del dormitorio è lenta la sera.","The dorm network is slow in the evening."],
+["Level 4","le cuffie","the headphones","Studio con le *cuffie* e musica classica.","I study with headphones and classical music."],
+["Level 4","i social","the social media","Passo troppo tempo sui *social*.","I spend too much time on social media."],
+["Level 4","seguire","to follow","Puoi *seguire* la lezione anche online.","You can follow the class online too."],
+["Level 4","la notifica","the notification","Spengo le *notifiche* quando studio.","I turn off notifications when I study."],
+["Level 4","il riassunto","the summary","Il *riassunto* del capitolo è di una pagina.","The chapter summary is one page."],
+["Level 4","ripetere","to repeat / rehearse","*Ripeto* ad alta voce prima dell'orale.","I rehearse out loud before the oral exam."],
+["Level 4","memorizzare","to memorize","Uso le flashcard per *memorizzare* i vocaboli.","I use flashcards to memorize vocabulary."],
+["Level 4","la concentrazione","the concentration","Il rumore rompe la *concentrazione*.","Noise breaks concentration."],
+["Level 4","concentrarsi","to concentrate","Non riesco a *concentrarmi* con la tv accesa.","I cannot concentrate with the tv on."],
+["Level 4","la pausa studio","the study break","Una *pausa studio* ogni ora fa bene.","A study break every hour is good for you."],
+["Level 4","l'orale","the oral exam","L'*orale* di letteratura dura venti minuti.","The literature oral exam lasts twenty minutes."],
+["Level 4","lo scritto","the written exam","Lo *scritto* vale il sessanta per cento.","The written exam counts for sixty percent."],
+["Level 4","il risultato","the result","I *risultati* escono lunedì sul portale.","The results come out Monday on the portal."],
+["Level 4","l'appello","the exam session / roll call","Mi iscrivo al primo *appello* di giugno.","I am signing up for the first June exam session."],
+["Level 4","i crediti","the credits (ECTS)","Questo corso vale sei *crediti*.","This course is worth six credits."],
+["Level 4","il piano di studi","the study plan","Devo ancora approvare il *piano di studi*.","I still have to get my study plan approved."],
+["Level 4","la segreteria","the registrar / admin office","La *segreteria* risponde solo la mattina.","The registrar's office only answers in the morning."],
+["Level 4","lo studentato","the student dorm","Lo *studentato* è a dieci minuti dal campus.","The student dorm is ten minutes from campus."],
+["Level 4","il dormitorio","the dormitory","Il *dormitorio* ha una cucina comune.","The dormitory has a shared kitchen."],
+["Level 4","il vocabolario","the vocabulary","Il mio *vocabolario* italiano cresce ogni giorno.","My Italian vocabulary grows every day."],
+["Level 4","la frase","the sentence / phrase","Scrivo una *frase* di esempio per ogni parola.","I write an example sentence for every word."],
+["Level 4","la pronuncia","the pronunciation","La *pronuncia* italiana è abbastanza regolare.","Italian pronunciation is fairly regular."],
+["Level 4","pronunciare","to pronounce","Come si *pronuncia* questa parola?","How do you pronounce this word?"],
+["Level 4","lo straniero","the foreigner","Da *straniera* ho dovuto imparare la burocrazia.","As a foreigner I had to learn the bureaucracy."],
+["Level 4","all'estero","abroad","Studiare *all'estero* apre la mente.","Studying abroad opens the mind."],
+["Level 4","la lingua straniera","the foreign language","Imparare una *lingua straniera* apre molte porte.","Learning a foreign language opens many doors."],
+["Level 4","il livello","the level","Il mio *livello* di italiano è B1.","My Italian level is B1."],
+["Level 4","il principiante","the beginner","Il corso per *principianti* è il martedì.","The beginners' course is on Tuesdays."],
+["Level 4","avanzato","advanced","Il gruppo *avanzato* legge romanzi interi.","The advanced group reads entire novels."],
+["Level 4","migliorare","to improve","Voglio *migliorare* la mia pronuncia.","I want to improve my pronunciation."],
+["Level 4","esercitarsi","to practice","Mi *esercito* con un tandem linguistico.","I practice with a language tandem."],
+["Level 4","lo sbaglio","the mistake / slip","Uno *sbaglio* non è la fine del mondo.","A mistake is not the end of the world."],
+["Level 4","sbagliare","to make a mistake","*Sbagliare* fa parte dell'apprendimento.","Making mistakes is part of learning."],
+["Level 4","la magistrale","the master's degree","Dopo la triennale farò la *magistrale*.","After the bachelor's I will do the master's."],
+["Level 4","sottolineare","to underline","*Sottolineo* solo le parole chiave.","I underline only the key words."],
+/* ===== Level 5 · Society & fluency (200) ===== */
+["Level 5","la notizia","the news (item)","Hai sentito la *notizia* dello sciopero?","Did you hear the news about the strike?"],
+["Level 5","il giornale","the newspaper","Leggo il *giornale* al bar la domenica.","I read the newspaper at the café on Sundays."],
+["Level 5","il giornalista","the journalist","Il *giornalista* intervista il sindaco.","The journalist interviews the mayor."],
+["Level 5","la televisione","the television","In *televisione* non c'è mai niente di bello.","There is never anything good on television."],
+["Level 5","la radio","the radio","Ascolto la *radio* mentre cucino.","I listen to the radio while cooking."],
+["Level 5","i media","the media","I *media* parlano solo di questo caso.","The media talk only about this case."],
+["Level 5","l'informazione","the information","Controllare le fonti dell'*informazione* è importante.","Checking the sources of information is important."],
+["Level 5","l'articolo","the article","Ho letto un *articolo* interessante sul clima.","I read an interesting article about the climate."],
+["Level 5","l'intervista","the interview","L'*intervista* alla scrittrice è bellissima.","The interview with the writer is beautiful."],
+["Level 5","la politica","the politics","A cena è meglio non parlare di *politica*.","At dinner it is better not to talk politics."],
+["Level 5","il governo","the government","Il *governo* ha annunciato nuove misure.","The government announced new measures."],
+["Level 5","il presidente","the president","Il *presidente* parla alla nazione stasera.","The president addresses the nation tonight."],
+["Level 5","le elezioni","the elections","Le *elezioni* si tengono in primavera.","The elections are held in spring."],
+["Level 5","votare","to vote","A diciotto anni si può *votare*.","At eighteen you can vote."],
+["Level 5","la legge","the law","La nuova *legge* entra in vigore a gennaio.","The new law comes into force in January."],
+["Level 5","il diritto","the right / law (field)","L'istruzione è un *diritto* di tutti.","Education is a right for everyone."],
+["Level 5","il dovere","the duty","Votare è un *dovere* civico.","Voting is a civic duty."],
+["Level 5","la libertà","the freedom","La *libertà* di stampa è fondamentale.","Freedom of the press is fundamental."],
+["Level 5","la giustizia","the justice","Tutti chiedono *giustizia* per le vittime.","Everyone demands justice for the victims."],
+["Level 5","la polizia","the police","La *polizia* ha chiuso la strada.","The police closed the street."],
+["Level 5","il ladro","the thief","Il *ladro* è entrato dalla finestra.","The thief came in through the window."],
+["Level 5","rubare","to steal","Mi hanno *rubato* la bici davanti alla stazione!","They stole my bike in front of the station!"],
+["Level 5","la guerra","the war","La *guerra* ha cambiato il paese per sempre.","The war changed the country forever."],
+["Level 5","la pace","the peace","Tutti sperano in una *pace* duratura.","Everyone hopes for a lasting peace."],
+["Level 5","la crisi","the crisis","La *crisi* energetica pesa sulle famiglie.","The energy crisis weighs on families."],
+["Level 5","l'economia","the economy","L'*economia* cresce lentamente quest'anno.","The economy is growing slowly this year."],
+["Level 5","l'azienda","the company","Quell'*azienda* assume venti ingegneri.","That company is hiring twenty engineers."],
+["Level 5","lo sciopero","the strike","Domani c'è lo *sciopero* dei treni, attenzione!","Tomorrow there is a train strike, watch out!"],
+["Level 5","la manifestazione","the demonstration","La *manifestazione* parte da piazza Maggiore.","The demonstration starts from Piazza Maggiore."],
+["Level 5","protestare","to protest","Gli studenti *protestano* contro i tagli.","The students protest against the cuts."],
+["Level 5","la società","the society","Viviamo in una *società* sempre più digitale.","We live in an increasingly digital society."],
+["Level 5","il cittadino","the citizen","Ogni *cittadino* ha diritti e doveri.","Every citizen has rights and duties."],
+["Level 5","lo stato","the state","Lo *stato* finanzia la ricerca pubblica.","The state funds public research."],
+["Level 5","la regione","the region","Ogni *regione* italiana ha la sua cucina.","Every Italian region has its own cuisine."],
+["Level 5","l'ambiente","the environment","Proteggere l'*ambiente* è una priorità.","Protecting the environment is a priority."],
+["Level 5","l'inquinamento","the pollution","L'*inquinamento* dell'aria è alto in pianura.","Air pollution is high in the plains."],
+["Level 5","il cambiamento climatico","the climate change","Il *cambiamento climatico* si vede anche qui.","Climate change is visible here too."],
+["Level 5","l'energia","the energy","L'*energia* solare costa sempre meno.","Solar energy costs less and less."],
+["Level 5","sostenibile","sustainable","Cerco uno stile di vita più *sostenibile*.","I am looking for a more sustainable lifestyle."],
+["Level 5","l'immigrazione","the immigration","L'*immigrazione* è un tema centrale del dibattito.","Immigration is a central topic of the debate."],
+["Level 5","l'Unione europea","the European Union","L'*Unione europea* finanzia il progetto Erasmus.","The European Union funds the Erasmus program."],
+["Level 5","la tradizione","the tradition","Ogni festa ha la sua *tradizione* culinaria.","Every holiday has its culinary tradition."],
+["Level 5","la cultura","the culture","La *cultura* del caffè qui è sacra.","The coffee culture here is sacred."],
+["Level 5","il volontariato","the volunteering","Faccio *volontariato* in un canile.","I volunteer at a dog shelter."],
+["Level 5","la sicurezza","the safety / security","La *sicurezza* in bici passa dal casco.","Bike safety starts with a helmet."],
+["Level 5","il pericolo","the danger","Quell'incrocio è un *pericolo* per i ciclisti.","That intersection is a danger for cyclists."],
+["Level 5","pericoloso","dangerous","Guidare stanchi è *pericoloso*.","Driving tired is dangerous."],
+["Level 5","sicuro","safe / sure","Questo quartiere è *sicuro* anche di notte.","This neighborhood is safe even at night."],
+["Level 5","la vita","the life","La *vita* da studente mi piace molto.","I really like student life."],
+["Level 5","la morte","the death","La *morte* del poeta è un mistero.","The poet's death is a mystery."],
+["Level 5","il futuro","the future","Nessuno conosce il *futuro*.","Nobody knows the future."],
+["Level 5","il passato","the past","Il *passato* della città si vede nei muri.","The city's past is visible in its walls."],
+["Level 5","la realtà","the reality","La *realtà* supera spesso la fantasia.","Reality often surpasses imagination."],
+["Level 5","il sogno","the dream","Il mio *sogno* è vivere vicino al mare.","My dream is to live near the sea."],
+["Level 5","sognare","to dream","Stanotte ho *sognato* di volare.","Last night I dreamed of flying."],
+["Level 5","l'idea","the idea","Ho un'*idea* per il fine settimana!","I have an idea for the weekend!"],
+["Level 5","il pensiero","the thought","Un dolce *pensiero* per la nonna.","A sweet thought for grandma."],
+["Level 5","la mente","the mind","Lo sport libera la *mente*.","Sport frees the mind."],
+["Level 5","la memoria","the memory (faculty)","Ho una buona *memoria* per i volti.","I have a good memory for faces."],
+["Level 5","il ricordo","the memory (recollection)","Questo posto è pieno di *ricordi*.","This place is full of memories."],
+["Level 5","la conoscenza","the knowledge","La *conoscenza* va condivisa.","Knowledge should be shared."],
+["Level 5","l'arte","the art","L'*arte* rinascimentale mi emoziona sempre.","Renaissance art always moves me."],
+["Level 5","la storia","the history / story","La *storia* d'Italia è lunga e complessa.","The history of Italy is long and complex."],
+["Level 5","la scienza","the science","La *scienza* richiede pazienza e dubbio.","Science requires patience and doubt."],
+["Level 5","la natura","the nature","La *natura* qui è incontaminata.","Nature here is unspoiled."],
+["Level 5","il mondo","the world","Vorrei girare il *mondo* in treno.","I would like to travel the world by train."],
+["Level 5","il senso","the sense / meaning","Questa frase non ha *senso*.","This sentence makes no sense."],
+["Level 5","il motivo","the reason / motive","Qual è il *motivo* del ritardo?","What is the reason for the delay?"],
+["Level 5","la ragione","the reason / being right","Alla fine avevi *ragione* tu.","In the end you were right."],
+["Level 5","lo scopo","the purpose / aim","Lo *scopo* del corso è parlare fluentemente.","The aim of the course is to speak fluently."],
+["Level 5","l'obiettivo","the goal / objective","Il mio *obiettivo* è il livello B2.","My goal is level B2."],
+["Level 5","la scelta","the choice","È stata una *scelta* difficile ma giusta.","It was a difficult but right choice."],
+["Level 5","scegliere","to choose","Non riesco a *scegliere* tra i due corsi.","I cannot choose between the two courses."],
+["Level 5","la decisione","the decision","La *decisione* finale spetta a te.","The final decision is up to you."],
+["Level 5","decidere","to decide","Dobbiamo *decidere* entro domani.","We have to decide by tomorrow."],
+["Level 5","il problema","the problem","Il *problema* non è il tempo, ma la voglia.","The problem is not time, but motivation."],
+["Level 5","la soluzione","the solution","C'è sempre una *soluzione* semplice?","Is there always a simple solution?"],
+["Level 5","risolvere","to solve","Abbiamo *risolto* il problema del wifi.","We solved the wifi problem."],
+["Level 5","la possibilità","the possibility","C'è la *possibilità* di un rinvio.","There is a possibility of a postponement."],
+["Level 5","l'occasione","the opportunity / occasion","Questa borsa di studio è un'*occasione* unica.","This scholarship is a unique opportunity."],
+["Level 5","l'opportunità","the opportunity","Ogni errore è un'*opportunità* per imparare.","Every mistake is an opportunity to learn."],
+["Level 5","il rischio","the risk","Senza *rischio* non c'è crescita.","Without risk there is no growth."],
+["Level 5","rischiare","to risk","Non voglio *rischiare* di perdere il volo.","I do not want to risk missing the flight."],
+["Level 5","il successo","the success","Il *successo* arriva con la costanza.","Success comes with consistency."],
+["Level 5","il fallimento","the failure","Un *fallimento* insegna più di una vittoria.","A failure teaches more than a victory."],
+["Level 5","lo sviluppo","the development","Lo *sviluppo* sostenibile è la sfida del secolo.","Sustainable development is the challenge of the century."],
+["Level 5","la crescita","the growth","La *crescita* personale richiede tempo.","Personal growth takes time."],
+["Level 5","la differenza","the difference","Che *differenza* c'è tra questi due verbi?","What is the difference between these two verbs?"],
+["Level 5","la fiducia","the trust / confidence","La *fiducia* si costruisce piano piano.","Trust is built little by little."],
+["Level 5","il dubbio","the doubt","Ho un *dubbio* sulla coniugazione.","I have a doubt about the conjugation."],
+["Level 5","il valore","the value","Il *valore* dell'amicizia non si misura.","The value of friendship cannot be measured."],
+["Level 5","il vantaggio","the advantage","Parlare tre lingue è un grande *vantaggio*.","Speaking three languages is a great advantage."],
+["Level 5","la responsabilità","the responsibility","Avere un cane è una *responsabilità*.","Having a dog is a responsibility."],
+["Level 5","l'abitudine","the habit","Il caffè dopo pranzo è un'*abitudine* italiana.","Coffee after lunch is an Italian habit."],
+["Level 5","l'atmosfera","the atmosphere","L'*atmosfera* del mercato di Natale è magica.","The atmosphere of the Christmas market is magical."],
+["Level 5","sostenere","to maintain / support","Molti *sostengono* che il dialetto stia tornando.","Many maintain that dialect is coming back."],
+["Level 5","negare","to deny","Non puoi *negare* l'evidenza.","You cannot deny the evidence."],
+["Level 5","ammettere","to admit","Devo *ammettere* che avevi ragione.","I must admit you were right."],
+["Level 5","immaginare","to imagine","Riesci a *immaginare* la scena?","Can you imagine the scene?"],
+["Level 5","suggerire","to suggest","Ti *suggerisco* di prenotare in anticipo.","I suggest you book in advance."],
+["Level 5","proporre","to propose","*Propongo* una pausa caffè.","I propose a coffee break."],
+["Level 5","la proposta","the proposal","La tua *proposta* mi sembra ottima.","Your proposal seems excellent to me."],
+["Level 5","convincere","to convince","Mi hai *convinto*: vengo anche io!","You convinced me: I am coming too!"],
+["Level 5","dimostrare","to prove / demonstrate","I dati *dimostrano* il contrario.","The data prove the opposite."],
+["Level 5","descrivere","to describe","Prova a *descrivere* la tua giornata in italiano.","Try to describe your day in Italian."],
+["Level 5","giudicare","to judge","Non *giudicare* un libro dalla copertina.","Do not judge a book by its cover."],
+["Level 5","criticare","to criticize","È facile *criticare*, difficile proporre.","It is easy to criticize, hard to propose."],
+["Level 5","apprezzare","to appreciate","*Apprezzo* molto il tuo aiuto.","I really appreciate your help."],
+["Level 5","considerare","to consider","Devi *considerare* anche i costi nascosti.","You must also consider the hidden costs."],
+["Level 5","riflettere","to reflect / think over","Ho bisogno di *riflettere* un attimo.","I need to think it over for a moment."],
+["Level 5","rendersi conto","to realize","Mi sono *resa conto* dell'errore troppo tardi.","I realized the mistake too late."],
+["Level 5","accorgersi","to notice","Non mi sono *accorta* dell'ora!","I did not notice the time!"],
+["Level 5","sembrare","to seem","Il compito *sembra* facile, ma non lo è.","The task seems easy, but it is not."],
+["Level 5","dipendere","to depend","*Dipende* dal punto di vista.","It depends on the point of view."],
+["Level 5","secondo me","in my opinion","*Secondo me* il primo episodio è il migliore.","In my opinion the first episode is the best."],
+["Level 5","il punto di vista","the point of view","Capisco il tuo *punto di vista*.","I understand your point of view."],
+["Level 5","l'opinione","the opinion","Ognuno ha diritto alla propria *opinione*.","Everyone has a right to their own opinion."],
+["Level 5","l'argomento","the topic / argument","Cambiamo *argomento*, per favore.","Let us change the topic, please."],
+["Level 5","quindi","therefore / so","Piove, *quindi* prendo l'ombrello.","It is raining, so I will take the umbrella."],
+["Level 5","però","however / but","Mi piace, *però* costa troppo.","I like it, however it costs too much."],
+["Level 5","infatti","indeed / in fact","Sembrava stanco, e *infatti* dormiva in piedi.","He seemed tired, and indeed he was sleeping standing up."],
+["Level 5","inoltre","moreover","Il corso è utile e *inoltre* è gratuito.","The course is useful and moreover it is free."],
+["Level 5","invece","instead / whereas","Io prendo il treno, lui *invece* va in bici.","I take the train, whereas he goes by bike."],
+["Level 5","mentre","while","*Mentre* studio, ascolto musica.","While I study, I listen to music."],
+["Level 5","durante","during","*Durante* la pausa controllo i messaggi.","During the break I check my messages."],
+["Level 5","secondo","according to","*Secondo* il meteo, domani nevica.","According to the forecast, it will snow tomorrow."],
+["Level 5","siccome","since / as","*Siccome* pioveva, siamo rimasti a casa.","Since it was raining, we stayed home."],
+["Level 5","nonostante","despite","*Nonostante* la pioggia, la festa continua.","Despite the rain, the party goes on."],
+["Level 5","comunque","anyway / in any case","Grazie *comunque* per l'aiuto!","Thanks anyway for the help!"],
+["Level 5","tuttavia","nevertheless","Il piano è rischioso; *tuttavia* ci proviamo.","The plan is risky; nevertheless we will try."],
+["Level 5","almeno","at least","Dormi *almeno* sette ore stanotte!","Sleep at least seven hours tonight!"],
+["Level 5","soprattutto","above all / especially","Mi piace l'Italia, *soprattutto* il sud.","I like Italy, especially the south."],
+["Level 5","ad esempio","for example","Molte parole, *ad esempio* ciao, vengono dal veneziano.","Many words, for example ciao, come from Venetian."],
+["Level 5","cioè","that is / I mean","Arrivo alle sei, *cioè* dopo la lezione.","I will arrive at six, that is, after class."],
+["Level 5","insomma","in short / well","*Insomma*, è andata bene alla fine!","In short, it went well in the end!"],
+["Level 5","allora","so / then","*Allora*, cosa facciamo stasera?","So, what are we doing tonight?"],
+["Level 5","ormai","by now / at this point","*Ormai* è troppo tardi per il cinema.","By now it is too late for the cinema."],
+["Level 5","appena","as soon as / just","Ti chiamo *appena* arrivo.","I will call you as soon as I arrive."],
+["Level 5","addirittura","even / no less","Hanno vinto *addirittura* il primo premio!","They even won first prize!"],
+["Level 5","anzi","on the contrary / rather","Non mi disturbi, *anzi*: mi fa piacere.","You are not bothering me, on the contrary: I am glad."],
+["Level 5","altrimenti","otherwise","Corri, *altrimenti* perdi il treno!","Run, otherwise you will miss the train!"],
+["Level 5","purtroppo","unfortunately","*Purtroppo* il concerto è annullato.","Unfortunately the concert is cancelled."],
+["Level 5","per fortuna","luckily","*Per fortuna* avevo l'ombrello!","Luckily I had my umbrella!"],
+["Level 5","in realtà","actually / in reality","*In realtà* non è mai stato in Italia.","Actually he has never been to Italy."],
+["Level 5","alla fine","in the end","*Alla fine* abbiamo scelto la pizza.","In the end we chose pizza."],
+["Level 5","all'inizio","at the beginning","*All'inizio* tutto sembrava difficile.","At the beginning everything seemed difficult."],
+["Level 5","di solito","usually","*Di solito* studio la mattina presto.","I usually study early in the morning."],
+["Level 5","probabilmente","probably","*Probabilmente* arriverò in ritardo.","I will probably arrive late."],
+["Level 5","ovviamente","obviously","*Ovviamente* il wifi è caduto durante l'esame.","Obviously the wifi went down during the exam."],
+["Level 5","quasi","almost","Ho *quasi* finito la tesina.","I have almost finished the paper."],
+["Level 5","circa","about / approximately","Il viaggio dura *circa* due ore.","The trip takes about two hours."],
+["Level 5","piuttosto","rather / quite","Oggi fa *piuttosto* freddo.","Today it is rather cold."],
+["Level 5","davvero","really","Questo tiramisù è *davvero* ottimo.","This tiramisu is really excellent."],
+["Level 5","in bocca al lupo","good luck (idiom)","Hai l'orale domani? *In bocca al lupo*!","You have the oral exam tomorrow? Good luck!"],
+["Level 5","boh","dunno (interjection)","Chi ha vinto ieri? *Boh*, non seguo il calcio.","Who won yesterday? Dunno, I do not follow football."],
+["Level 5","dai","come on","*Dai*, vieni con noi: sarà divertente!","Come on, come with us: it will be fun!"],
+["Level 5","beh","well (interjection)","*Beh*, potevamo fare di peggio.","Well, we could have done worse."],
+["Level 5","vabbè","oh well / fine","*Vabbè*, facciamo come dici tu.","Oh well, let us do it your way."],
+["Level 5","mamma mia","oh my goodness","*Mamma mia*, quanto traffico oggi!","Oh my goodness, so much traffic today!"],
+["Level 5","figurati","do not mention it / no way","Grazie mille! — *Figurati*!","Thanks a lot! — Do not mention it!"],
+["Level 5","ci mancherebbe","of course / do not mention it","Posso chiederti un favore? — *Ci mancherebbe*!","May I ask you a favor? — Of course!"],
+["Level 5","non vedo l'ora","I cannot wait","*Non vedo l'ora* di rivederti!","I cannot wait to see you again!"],
+["Level 5","avere voglia di","to feel like","Ho *voglia di* un gelato al pistacchio.","I feel like a pistachio ice cream."],
+["Level 5","la figuraccia","the embarrassing blunder","Che *figuraccia* davanti a tutti!","What an embarrassing blunder in front of everyone!"],
+["Level 5","che ne so","how should I know","Dove sono le chiavi? — *Che ne so*!","Where are the keys? — How should I know!"],
+["Level 5","chissà","who knows","*Chissà* se un giorno tornerò qui.","Who knows if I will ever come back here."],
+["Level 5","meno male","thank goodness","*Meno male* che sei arrivato!","Thank goodness you arrived!"],
+["Level 5","peccato","what a pity","Non puoi venire? Che *peccato*!","You cannot come? What a pity!"],
+["Level 5","la roba","the stuff","Ho lasciato la mia *roba* in palestra.","I left my stuff at the gym."],
+["Level 5","il casino","the mess / chaos","Che *casino* in centro per la partita!","What chaos downtown because of the match!"],
+["Level 5","un sacco di","a lot of (informal)","Ho *un sacco di* cose da fare oggi.","I have a lot of things to do today."],
+["Level 5","in gamba","capable / on the ball","La nuova dottoressa è davvero *in gamba*.","The new doctor is really on the ball."],
+["Level 5","piano piano","little by little","*Piano piano* sto imparando l'italiano.","Little by little I am learning Italian."],
+["Level 5","a proposito","by the way","*A proposito*, hai visto il messaggio?","By the way, did you see the message?"],
+["Level 5","tra l'altro","among other things / besides","*Tra l'altro*, domani è festa nazionale.","Besides, tomorrow is a national holiday."],
+["Level 5","al volo","quickly / on the fly","Prendo un panino *al volo* e torno.","I will grab a sandwich on the fly and come back."],
+["Level 5","sul serio","seriously","Dici *sul serio* o scherzi?","Are you serious or joking?"],
+["Level 5","essere al verde","to be broke","A fine mese sono sempre *al verde*.","At the end of the month I am always broke."],
+["Level 5","in giro","around (about town)","Oggi c'è poca gente *in giro*.","Today there are few people around."],
+["Level 5","prendere in giro","to tease / make fun of","Mi stai *prendendo in giro*?","Are you making fun of me?"],
+["Level 5","fare finta","to pretend","Non *fare finta* di niente!","Do not pretend nothing happened!"],
+["Level 5","farcela","to manage / make it","Non so se posso *farcela* da sola.","I do not know if I can manage on my own."],
+["Level 5","mi raccomando","please / I am counting on you","Scrivimi quando arrivi, *mi raccomando*!","Text me when you arrive, please!"],
+["Level 5","che schifo","how gross","*Che schifo* questo caffè della macchinetta!","How gross this vending machine coffee is!"],
+["Level 5","tipo","like (filler)","Era *tipo* mezzanotte quando è tornato.","It was like midnight when he came back."],
+["Level 5","magari","maybe / if only","*Magari* potessi restare un altro mese!","If only I could stay another month!"],
+["Level 5","mica","not at all (informal)","Non è *mica* colpa tua.","It is not your fault at all."],
+["Level 5","sbrigarsi","to hurry up","*Sbrigati*, il treno parte tra poco!","Hurry up, the train leaves soon!"],
+["Level 5","l'attimo","the instant / moment","Un *attimo*, prendo la giacca e arrivo.","One moment, I will grab my jacket and come."],
+["Level 5","la sfida","the challenge","Imparare due lingue è una bella *sfida*.","Learning two languages is quite a challenge."],
+["Level 5","la pazienza","the patience","Con la burocrazia serve tanta *pazienza*.","With bureaucracy you need a lot of patience."],
+["Level 5","il coraggio","the courage","Ci vuole *coraggio* per trasferirsi all'estero.","It takes courage to move abroad."],
+["Level 5","la fantasia","the imagination","I bambini hanno una *fantasia* incredibile.","Children have an incredible imagination."],
+["Level 5","il silenzio","the silence","Il *silenzio* della biblioteca mi rilassa.","The silence of the library relaxes me."],
+["Level 5","la voce","the voice","Riconosco la sua *voce* al telefono.","I recognize her voice on the phone."],
+["Level 5","il rumore di fondo","the background noise","Il *rumore di fondo* del bar mi aiuta a studiare.","The background noise of the café helps me study."],
+["Level 5","lo spazio","the space","Ho bisogno di un po' di *spazio* per pensare.","I need a bit of space to think."],
+["Level 5","la luna","the moon","Stanotte la *luna* è piena e luminosa.","Tonight the moon is full and bright."],
+["Level 5","il cielo","the sky","Il *cielo* al tramonto era rosa.","The sky at sunset was pink."],
+["Level 5","l'aria","the air","L'*aria* di montagna mette appetito.","Mountain air works up an appetite."],
+];
+
+/* ---------------- decks ----------------
+   Card fields keep the historic names nl/nls = target-language word/sentence,
+   whatever the deck language actually is (Dutch for Deniz, Italian for Aruna). */
+const DECKS = {
+  nl: {code:"NL", flag:"🇳🇱", name:"Dutch", lang:"nl-NL", voiceRe:/^nl/i, raw:RAW_NL,
+       greeting:"Klaar om te leren?",
+       sub:"1000 essential Dutch words · in context",
+       searchPh:"Search Dutch or English…",
+       phWord:"de fietsenmaker", phEn:"the bicycle repairman",
+       phSent:"Mijn fiets staat bij de *fietsenmaker*.", phEnSent:"My bike is at the bicycle repairman."},
+  it: {code:"IT", flag:"🇮🇹", name:"Italian", lang:"it-IT", voiceRe:/^it/i, raw:RAW_IT,
+       greeting:"Pronti a imparare?",
+       sub:"1000 essential Italian words · in context",
+       searchPh:"Search Italian or English…",
+       phWord:"il fornaio", phEn:"the baker",
+       phSent:"Compro il pane dal *fornaio*.", phEnSent:"I buy the bread at the baker."}
+};
+let DECK = DECKS.nl;
+let CARDS = [];
+function buildCards(){
+  CARDS = DECK.raw.map(function(r){
+    return {id:"w:"+r[1], cat:r[0], nl:r[1], en:r[2], nls:r[3], ens:r[4], builtin:true};
+  });
+}
 
 const LEVEL_DESC = {
   "Level 1": "Survival basics",
@@ -1271,13 +2504,19 @@ const LEVEL_DESC = {
 
 /* ---------------- accounts & login ----------------
    Client-side gate: it personalises the app and keeps each user's progress
-   under their own storage keys. It is NOT real security — the site is static. */
+   under their own storage keys. It is NOT real security — the site is static.
+   Only two names can ever enter: Deniz (fixed password hash below) and Aruna.
+   Aruna's profile is claimable: the first person to log in with the name
+   Aruna sets its password (stored hashed in this browser); from then on the
+   profile belongs to them on this device. */
 const ACCOUNTS = [
-  {user: "deniz", display: "Deniz",
+  {user: "deniz", display: "Deniz", deck: "nl",
    sha: "c5b6f604c41c22328fbfaa2f2af369682622e3446548730c3cb591bf8514bcb0",
-   djb: 4238835318}
+   djb: 4238835318},
+  {user: "aruna", display: "Aruna", deck: "it", claim: true}
 ];
 const SESSION_KEY = "woordjes.session";
+const CLAIM_KEY = "woordjes.claim.aruna";
 let currentUser = null;
 let currentDisplay = "";
 
@@ -1302,6 +2541,11 @@ let LSK = null;
 function setUser(acc){
   currentUser = acc.user;
   currentDisplay = acc.display;
+  DECK = DECKS[acc.deck] || DECKS.nl;
+  buildCards();
+  document.body.classList.toggle("theme-it", acc.deck === "it");
+  document.body.classList.toggle("theme-nl", acc.deck !== "it");
+  document.body.classList.toggle("user-aruna", acc.user === "aruna");
   LSK = {
     progress: "woordjes." + acc.user + ".progress",
     custom:   "woordjes." + acc.user + ".custom",
@@ -1314,7 +2558,9 @@ function load(key, fallback){ try{ const v = localStorage.getItem(key); return v
 function save(key, value){ try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){} }
 
 function migrateLegacy(){
-  // carry over progress saved by the pre-login versions of the app
+  // carry over progress saved by the pre-login versions of the app (Dutch-only
+  // era, so this only ever applies to Deniz's account)
+  if(currentUser !== "deniz") return;
   try{
     if(!localStorage.getItem(LSK.progress) && localStorage.getItem("woordjes.progress")){
       ["progress", "custom", "settings", "streak", "daily"].forEach(function(n){
@@ -1445,8 +2691,11 @@ function showCard(){
   const el = $("card");
   el.classList.add("notrans");
   el.classList.remove("flipped");
+  const sc = document.querySelector(".scene");
+  sc.classList.remove("deal");
   void el.offsetWidth;
   el.classList.remove("notrans");
+  sc.classList.add("deal");
   const card = currentCard();
   $("facefront").innerHTML = faceHTML(card, "front");
   $("faceback").innerHTML = faceHTML(card, "back");
@@ -1545,6 +2794,14 @@ function localDate(offsetDays){
 
 /* ---------------- rendering ---------------- */
 function $(id){ return document.getElementById(id); }
+let toastTimer = null;
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+}
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function fmt(s){ return esc(s).replace(/\*([^*]+)\*/g, '<b class="hl">$1</b>'); }
 function plain(s){ return String(s).replace(/\*/g, ""); }
@@ -1685,9 +2942,9 @@ if("speechSynthesis" in window){
 function speak(text){
   if(!("speechSynthesis" in window)){ toast("Speech is not supported in this browser"); return; }
   const u = new SpeechSynthesisUtterance(text);
-  const v = voices.find(function(v){ return /^nl/i.test(v.lang); });
+  const v = voices.find(function(v){ return DECK.voiceRe.test(v.lang); });
   if(v) u.voice = v;
-  u.lang = "nl-NL";
+  u.lang = DECK.lang;
   u.rate = 0.9;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
@@ -1701,7 +2958,7 @@ function addWord(){
   const ens = $("f-ens").value.trim();
   let cat = $("f-cat").value;
   if(cat === "__new") cat = $("f-newcat").value.trim() || "My words";
-  if(!nl || !en){ toast("Dutch and English are both required"); return; }
+  if(!nl || !en){ toast(DECK.name + " and English are both required"); return; }
   custom.push({id: "c" + Date.now(), cat: cat, nl: nl, en: en, nls: nls, ens: ens, builtin: false});
   save(LSK.custom, custom);
   ["f-nl", "f-en", "f-nls", "f-ens", "f-newcat"].forEach(function(id){ $(id).value = ""; });
@@ -1726,7 +2983,7 @@ function exportBackup(){
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "woordjes-backup.json";
+  a.download = "aru-app-" + currentUser + "-backup.json";
   a.click();
   URL.revokeObjectURL(a.href);
   toast("Backup downloaded");
@@ -1767,29 +3024,76 @@ function resetProgress(){
 }
 
 /* ---------------- login flow ---------------- */
+function loginError(msg){
+  $("login-err").textContent = msg;
+  $("login-pass").value = "";
+}
+function arunaClaim(){ return load(CLAIM_KEY, null); }
+
+function updateLoginHint(){
+  const u = $("login-user").value.trim().toLowerCase();
+  let hint = "";
+  if(u === "aruna" && !arunaClaim()){
+    hint = "First time here? This name is reserved for one special person — " +
+           "the password you choose now becomes yours and locks the profile on this device. 🐾";
+  }
+  $("login-hint").textContent = hint;
+}
+
 async function tryLogin(){
   const u = $("login-user").value.trim().toLowerCase();
   const p = $("login-pass").value;
+  if(!u || !p){ loginError("Enter a name and a password."); return; }
   const acc = ACCOUNTS.find(function(a){ return a.user === u; });
-  let ok = false;
-  if(acc && p){
-    const h = await hashPassword(p);
-    ok = h !== null ? (h === acc.sha) : (djb2("woordjes-v1:" + p) === acc.djb);
-  }
-  if(!ok){
-    $("login-err").textContent = "Wrong username or password.";
-    $("login-pass").value = "";
+  if(!acc){
+    loginError("This is a private app — only Deniz and Aruna can come in. ✋");
     return;
   }
+  let ok = false, firstClaim = false;
+  const h = await hashPassword(p);
+  const d = djb2("woordjes-v1:" + p);
+  if(acc.claim){
+    const claim = arunaClaim();
+    if(!claim){
+      if(p.length < 4){ loginError("Pick a password of at least 4 characters."); return; }
+      save(CLAIM_KEY, {sha: h, djb: d, at: Date.now()});
+      ok = true; firstClaim = true;
+    }else{
+      ok = (h !== null && claim.sha !== null) ? (h === claim.sha) : (d === claim.djb);
+      if(!ok) loginError("That is not Aruna's password.");
+    }
+  }else{
+    ok = h !== null ? (h === acc.sha) : (d === acc.djb);
+    if(!ok) loginError("Wrong password.");
+  }
+  if(!ok) return;
   $("login-err").textContent = "";
   try{ localStorage.setItem(SESSION_KEY, JSON.stringify({user: acc.user, at: Date.now()})); }catch(e){}
   setUser(acc);
   boot();
+  if(firstClaim) toast("Benvenuta, Aruna! 🇮🇹 This profile is yours now — Pıtırcık was waiting for you 🐶");
 }
 
 function logout(){
   try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
   location.reload();
+}
+
+function applyDeckUI(){
+  $("brandsub").textContent = DECK.sub;
+  $("brandflag").textContent = DECK.flag;
+  $("greeth2").textContent = DECK.greeting;
+  $("autospeaklbl").textContent = "Auto-pronounce " + DECK.name + " 🔊";
+  $("search").placeholder = DECK.searchPh;
+  document.querySelector('#dirseg [data-dir="nl-en"]').textContent = DECK.code + " → EN";
+  document.querySelector('#dirseg [data-dir="en-nl"]').textContent = "EN → " + DECK.code;
+  $("lbl-word").textContent = DECK.name + " *";
+  $("lbl-sent").textContent = DECK.name + " example sentence";
+  $("f-nl").placeholder = DECK.phWord;
+  $("f-en").placeholder = DECK.phEn;
+  $("f-nls").placeholder = DECK.phSent;
+  $("f-ens").placeholder = DECK.phEnSent;
+  $("addhint").textContent = "Tip: wrap the word in *asterisks* inside the " + DECK.name + " sentence to highlight it on the card.";
 }
 
 function boot(){
@@ -1804,6 +3108,7 @@ function boot(){
     settings.cat = "All";
     save(LSK.settings, settings);
   }
+  applyDeckUI();
   renderStats();
   renderDirSeg();
   renderDeckChips();
@@ -1899,6 +3204,45 @@ $("logoutbtn").addEventListener("click", logout);
 $("login-btn").addEventListener("click", tryLogin);
 $("login-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryLogin(); });
 $("login-user").addEventListener("keydown", function(e){ if(e.key === "Enter") $("login-pass").focus(); });
+$("login-user").addEventListener("input", updateLoginHint);
+
+/* ---------------- Pıtırcık the dog 🐶 ----------------
+   Aruna's fluffy white maltese-pumi companion. Lives in the corner of her
+   screen; every click or tap is a pet — wiggle, hearts, happy barks. */
+const DOG_SAYS = ["Bau!", "Bau bau! 🦴", "❤️", "Mrrf!", "🐾", "Woof!"];
+let dogBubbleTimer = null;
+function petDog(){
+  const dog = $("dog");
+  dog.classList.remove("petting");
+  void dog.offsetWidth;
+  dog.classList.add("petting");
+  // floating hearts
+  const emo = ["❤️", "🩷", "💛", "✨", "🐾"];
+  for(let i = 0; i < 2 + Math.floor(Math.random() * 2); i++){
+    const h = document.createElement("span");
+    h.className = "dogheart";
+    h.textContent = emo[Math.floor(Math.random() * emo.length)];
+    h.style.left = (18 + Math.random() * 56) + "px";
+    h.style.animationDelay = (Math.random() * 0.18) + "s";
+    dog.appendChild(h);
+    h.addEventListener("animationend", function(){ h.remove(); });
+  }
+  // happy bark bubble now and then
+  if(Math.random() < 0.45){
+    const b = $("dogbubble");
+    b.textContent = DOG_SAYS[Math.floor(Math.random() * DOG_SAYS.length)];
+    b.classList.add("show");
+    clearTimeout(dogBubbleTimer);
+    dogBubbleTimer = setTimeout(function(){ b.classList.remove("show"); }, 1300);
+  }
+  // remember the love
+  settings.pets = (settings.pets || 0) + 1;
+  save(LSK.settings, settings);
+  $("dog").title = "Pıtırcık · petted " + settings.pets + " time" + (settings.pets === 1 ? "" : "s");
+  if(settings.pets % 50 === 0) toast("Pıtırcık has been petted " + settings.pets + " times. He loves you! 🐶❤️");
+}
+$("dog").addEventListener("click", petDog);
+$("dog").addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); petDog(); } });
 
 document.addEventListener("keydown", function(e){
   const tag = e.target.tagName;
