@@ -83,6 +83,27 @@ Never mix the two.**
 - Data is per-device; Export/Import backup in the footer moves it across
   devices (filename `aru-app-<user>-backup.json`).
 
+## Patch notes (MAINTENANCE RULE — applies to every future session)
+
+- **Every user-visible change must be announced to the users**: append an
+  entry to `PATCH_NOTES` in `index.html` (newest first; small changes may be
+  combined into one entry) and bump `APP_VERSION`.
+- The "What's new" panel auto-opens once per user per version
+  (`settings.seenNotes`), and stays reachable via the footer link.
+
+## Italian extras (theme-it only)
+
+- **Music 🎵**: `MUSIC_TRACKS` + a tiny Web Audio chiptune sequencer (square
+  wave, note strings like `"E4:.5 R:1"`). Round button bottom-left, visible
+  only with `body.theme-it`; starts on tap (autoplay policies), toast shows
+  the track name. **Only public-domain melodies** (composer dead 70+ years).
+  ⚠️ Never add 'O Sole Mio — an Italian court ruling (Mazzucchi) keeps it in
+  copyright until ~2042. Current playlist: Funiculì Funiculà, Santa Lucia,
+  Tarantella Napoletana, La donna è mobile, Torna a Surriento.
+- **Pizzas 🍕**: `spawnPizza()` drifts emoji up the screen every ~7s
+  (`z-index:2`, `pointer-events:none`, capped at 12); `pizzaBurst()` fires on
+  Italian session completion. Both skip when `prefers-reduced-motion`.
+
 ## Pıtırcık 🐶 (Aruna's dog)
 
 - Inline SVG in `index.html` (`#dog`, fixed bottom-right), visible only with
@@ -103,7 +124,12 @@ Never mix the two.**
 - v1: 169 words, light theme, basic Leitner.
 - v2: dark mode default, 1000 words (5×200), 200/day scheduler (simulated & tuned).
 - v3: login screen, per-user tracked data, legacy migration.
-- v4 (current): renamed to **The Aru App**; modern glass UI with per-language
+- v4.0: renamed to **The Aru App**; modern glass UI with per-language
   themes; Italian deck `RAW_IT` (1000 words, 5×200) for Aruna; claim-on-first-
   login Aruna account; Pıtırcık the pettable dog; fixed missing `toast()`
   (was called but never defined in v3).
+- v4.1: temp `yes` test account; `touch-action:manipulation` fix for
+  double-tap zoom while petting; mobile flows verified in emulation.
+- v4.2 (current): Web Audio chiptune player with public-domain Italian
+  classics; floating pizzas + session-end pizza burst on theme-it; in-app
+  "What's new" patch-notes panel (auto-opens once per version per user).

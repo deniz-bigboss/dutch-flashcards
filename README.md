@@ -24,6 +24,12 @@ no dependencies, no build step, works offline once loaded.
 - Text-to-speech in the right language (Dutch for Deniz, Italian for Aruna)
 - **Pıtırcık** 🐶 — Aruna's fluffy white maltese-pumi lives in the corner of
   her screen; click or tap him for pets, wiggles, hearts and happy barks
+- **Italian music** 🎵 — tap the note button for 8-bit arrangements of
+  public-domain Italian classics (Funiculì Funiculà, Santa Lucia, the
+  Tarantella…), synthesized right in the browser — no files, no copyright
+- **Pizzas** 🍕 — they drift across the Italian side, and finishing a
+  session earns a little pizza party
+- **What's new panel** 📝 — every update is announced in-app (footer link)
 - Add your own words, search the full list, export/import backups, daily streak
 
 ## The learning schedule

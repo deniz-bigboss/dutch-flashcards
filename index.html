@@ -281,6 +281,61 @@
     to{opacity:0;transform:translateY(-46px) scale(1.25) rotate(8deg)}
   }
 
+  /* ---------------- Italian music button 🎵 ---------------- */
+  #musicbtn{
+    position:fixed;left:12px;bottom:74px;z-index:30;display:none;
+    width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);
+    background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-size:19px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.4);
+    transition:transform .15s;font-family:inherit;
+  }
+  #musicbtn:hover{transform:scale(1.08)}
+  body.theme-it #musicbtn{display:block}
+  #musicbtn.playing{
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    animation:musicpulse 1.2s ease-in-out infinite;
+  }
+  @keyframes musicpulse{
+    0%,100%{box-shadow:0 6px 16px rgba(0,0,0,.4)}
+    50%{box-shadow:0 0 22px color-mix(in srgb,var(--ac) 60%,transparent)}
+  }
+
+  /* ---------------- pizzas 🍕 ---------------- */
+  .wrap{position:relative;z-index:1}
+  .pizza{
+    position:fixed;bottom:-70px;z-index:2;pointer-events:none;opacity:0;
+    animation:pizzafloat linear forwards;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
+  }
+  @keyframes pizzafloat{
+    0%{transform:translateY(0) rotate(0deg);opacity:0}
+    10%{opacity:.45}
+    90%{opacity:.38}
+    100%{transform:translateY(-112vh) rotate(360deg);opacity:0}
+  }
+
+  /* ---------------- what's new panel ---------------- */
+  .notes{
+    position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    padding:18px;background:rgba(5,6,10,.6);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+  .notesbox{
+    background:#141826f5;border:1px solid var(--line2);border-radius:24px;
+    width:min(440px,94vw);max-height:82vh;overflow:auto;padding:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    animation:loginin .35s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .notesbox h2{margin:0 0 14px;font-size:21px}
+  .note{margin-bottom:18px}
+  .notehead{display:flex;align-items:baseline;gap:8px;font-size:14.5px;font-weight:700;flex-wrap:wrap}
+  .notehead b{color:var(--hl)}
+  .notedate{margin-left:auto;color:var(--dim);font-size:11.5px;font-weight:400}
+  .newtag{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#0b0d14;font-size:10px;font-weight:800;border-radius:99px;padding:2px 8px}
+  .note ul{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:13.5px;line-height:1.6}
+  .note li{margin-bottom:7px}
+  .notesbox .bigbtn{margin-top:4px}
+
   .hidden{display:none!important}
   @media(max-width:430px){
     .optrow{flex-direction:column;align-items:flex-start;gap:6px}
@@ -290,7 +345,8 @@
   }
   @media(prefers-reduced-motion:reduce){
     body::before,body::after,#dog svg,#dogtail,#dogeyes{animation:none}
-    .panel.on,.scene.deal,.loginbox{animation:none}
+    .panel.on,.scene.deal,.loginbox,#musicbtn.playing{animation:none}
+    .pizza{display:none}
   }
 </style>
 </head>
@@ -396,10 +452,22 @@
 
   <footer class="foot">
     <span>space = flip · ← / 1 = not yet · → / 2 = knew it · P = pronounce</span>
-    <span><a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
+    <span><a id="notesbtn">What's new</a> · <a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
     <input type="file" id="importfile" accept="application/json" hidden>
   </footer>
 
+</div>
+
+<!-- Italian music 🎵 — public-domain classics, synthesized in the browser -->
+<button id="musicbtn" aria-label="Italian music on/off" title="Italian music">🎵</button>
+
+<!-- What's new (patch notes) -->
+<div id="notes" class="notes hidden" role="dialog" aria-label="What's new">
+  <div class="notesbox">
+    <h2>What's new ✨</h2>
+    <div id="noteslist"></div>
+    <button class="bigbtn" id="notesclose">Nice!</button>
+  </div>
 </div>
 
 <!-- Pıtırcık 🐶 — Aruna's fluffy white maltese-pumi. Tap to pet! -->
@@ -2503,6 +2571,31 @@ const LEVEL_DESC = {
   "Level 5": "Society & fluency"
 };
 
+/* ---------------- patch notes ----------------
+   RULE for future updates: any user-visible change gets an entry here
+   (newest first) and a bumped APP_VERSION — the panel auto-opens once per
+   user per version, and stays reachable via the footer "What's new" link. */
+const APP_VERSION = "4.2.0";
+const PATCH_NOTES = [
+  {v: "4.2.0", date: "12 June 2026", title: "La Dolce Vita 🎶🍕", items: [
+    "🎵 Italian music! Tap the round note button (bottom-left) for 8-bit arrangements of public-domain Italian classics — Funiculì Funiculà, Santa Lucia, the Tarantella and more. No copyright worries: the tunes are over a century old and the arrangements are generated right in your browser.",
+    "🍕 Pizzas now drift gently across the Italian side of the app — and finishing a study session earns a little pizza party.",
+    "📝 This What's new panel: every update will be announced here from now on. Reopen it any time from the footer."
+  ]},
+  {v: "4.1.0", date: "11 June 2026", title: "Phone polish 📱", items: [
+    "🤏 Fixed double-tap zoom when petting Pıtırcık quickly on a phone — pet away.",
+    "🧪 Added a temporary test account so the Italian experience can be previewed without claiming Aruna's profile.",
+    "✅ Verified the whole app end-to-end on a phone-sized screen: login, card flips, rating and petting all by tap."
+  ]},
+  {v: "4.0.0", date: "11 June 2026", title: "The Aru App ✨", items: [
+    "🪄 New name, new look: glassy dark design, drifting glow background, per-language colors (orange for Dutch, green for Italian).",
+    "🇮🇹 A full Italian deck for Aruna: 1000 words in 5 levels with example sentences and Italian pronunciation — same 200-cards-a-day rhythm as the Dutch deck.",
+    "🔐 Private login: Deniz plus a claim-on-first-login Aruna profile. The first password entered with her name locks the profile — nobody else can come in.",
+    "🐶 Pıtırcık joined the app! Aruna's fluffy white maltese-pumi lives in the corner — click or tap him for wiggles, hearts and happy barks.",
+    "🔧 Fixed a v3 bug where toast notifications were silently broken."
+  ]}
+];
+
 /* ---------------- accounts & login ----------------
    Client-side gate: it personalises the app and keeps each user's progress
    under their own storage keys. It is NOT real security — the site is static.
@@ -2768,6 +2861,7 @@ function finishSession(){
     (streak.count > 0 ? '<p>🔥 Streak: <b>' + streak.count + ' day' + (streak.count > 1 ? "s" : "") + '</b></p>' : '') +
     '<button class="bigbtn" id="againbtn">Study more</button>' +
     '<button class="linkbtn" id="backbtn">Back to overview</button>';
+  if(DECK === DECKS.it) pizzaBurst();
   renderStats();
   renderStartInfo();
 }
@@ -3125,6 +3219,11 @@ function boot(){
   $("autospeak").checked = !!settings.autoSpeak;
   $("login").classList.add("hidden");
   $("appwrap").classList.remove("hidden");
+  if(settings.seenNotes !== APP_VERSION){
+    settings.seenNotes = APP_VERSION;
+    save(LSK.settings, settings);
+    openNotes();
+  }
 }
 
 /* ---------------- wiring ---------------- */
@@ -3260,6 +3359,137 @@ document.addEventListener("keydown", function(e){
   else if(e.key === "2" || e.key === "ArrowRight"){ rate(true); }
   else if(e.key === "p" || e.key === "P"){ const c = currentCard(); if(c) speak(plain(c.nl)); }
 });
+
+/* ---------------- Italian music 🎵 ----------------
+   Tiny Web Audio chiptune player — nothing is downloaded and nothing is
+   copyrighted: these are our own 8-bit arrangements of Italian melodies
+   whose composers died 100+ years ago (all public domain). */
+const MUSIC_VOL = 0.045;
+const MUSIC_TRACKS = [
+  {name: "Funiculì Funiculà (1880)", bpm: 132, seq:
+    "E4:.5 F4:.5 G4:1 E4:.5 F4:.5 G4:1 G4:.5 A4:.5 G4:.5 F4:.5 E4:1 D4:1 " +
+    "E4:.5 F4:.5 G4:1 E4:.5 F4:.5 G4:1 G4:.5 A4:.5 G4:.5 F4:.5 E4:2 R:.5 " +
+    "G4:.5 A4:.5 B4:.5 C5:1.5 A4:.5 G4:1 F4:.5 E4:.5 D4:1.5 E4:.5 C4:2 R:1 " +
+    "C5:.5 B4:.5 A4:.5 G4:.5 A4:1 F4:1 B4:.5 A4:.5 G4:.5 F4:.5 G4:1 E4:1 " +
+    "C5:.5 B4:.5 A4:.5 G4:.5 A4:.5 C5:.5 G4:.5 E4:.5 D4:1 C4:2"},
+  {name: "Santa Lucia (1849)", bpm: 100, seq:
+    "C4:1.5 E4:.5 E4:1 D4:1.5 F4:.5 F4:1 E4:1 G4:1 C5:1 B4:1.5 A4:.5 G4:1 A4:2 R:1 " +
+    "G4:1.5 F4:.5 F4:1 E4:1 G4:1 E4:1 D4:1.5 D4:.5 E4:1 C4:2 R:1"},
+  {name: "Tarantella Napoletana (trad.)", bpm: 160, seq:
+    "A4:.5 C5:.5 B4:.5 A4:.5 G4:.5 A4:.5 B4:.5 G4:.5 A4:.5 C5:.5 B4:.5 A4:.5 E5:1 E4:.5 E4:.5 " +
+    "A4:.5 C5:.5 B4:.5 A4:.5 G4:.5 A4:.5 B4:.5 G4:.5 A4:1.5 R:.5 " +
+    "E5:.5 E5:.5 D5:.5 C5:.5 D5:.5 D5:.5 C5:.5 B4:.5 C5:.5 C5:.5 B4:.5 A4:.5 B4:1 E4:1 " +
+    "A4:.5 C5:.5 B4:.5 A4:.5 G4:.5 B4:.5 A4:1.5 R:.5"},
+  {name: "La donna è mobile (1851)", bpm: 140, seq:
+    "E5:.67 E5:.67 E5:.67 C5:1 D5:.67 D5:.67 D5:.67 B4:1 " +
+    "C5:.67 C5:.67 C5:.67 A4:1 G4:.67 A4:.67 B4:.67 G4:1 R:.5 " +
+    "E5:.67 E5:.67 E5:.67 C5:1 D5:.67 D5:.67 D5:.67 B4:1 " +
+    "C5:.67 C5:.67 C5:.67 A4:1 G4:1 C5:1.5 R:.5"},
+  {name: "Torna a Surriento (1894)", bpm: 96, seq:
+    "A4:1 C5:1 E5:1 E5:1.5 D5:.5 C5:1 B4:1 D5:1 D5:1 D5:1.5 C5:.5 B4:1 " +
+    "A4:1 C5:1 C5:1 C5:1.5 B4:.5 A4:1 G4:1 B4:1 E5:1 B4:2 R:1 " +
+    "A4:1 C5:1 E5:1 A5:1.5 G5:.5 E5:1 F5:1 E5:1 D5:1 C5:2 R:1"}
+];
+let audioCtx = null, musicGain = null, musicOn = false, musicTrack = 0, musicTimer = null;
+function noteHz(n){
+  const m = n.match(/^([A-G])([#b]?)(\d)$/);
+  const base = {C:0, D:2, E:4, F:5, G:7, A:9, B:11}[m[1]];
+  const semi = base + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
+  const midi = semi + 12 * (parseInt(m[3], 10) + 1);
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+function scheduleTrack(t){
+  const beat = 60 / t.bpm;
+  let when = audioCtx.currentTime + 0.12;
+  t.seq.trim().split(/\s+/).forEach(function(tok){
+    const p = tok.split(":");
+    const dur = parseFloat(p[1] || "1") * beat;
+    if(p[0] !== "R"){
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = noteHz(p[0]);
+      g.gain.setValueAtTime(0, when);
+      g.gain.linearRampToValueAtTime(MUSIC_VOL, when + 0.015);
+      g.gain.setValueAtTime(MUSIC_VOL, when + dur * 0.7);
+      g.gain.linearRampToValueAtTime(0.0001, when + dur * 0.92);
+      o.connect(g); g.connect(musicGain);
+      o.start(when); o.stop(when + dur);
+    }
+    when += dur;
+  });
+  return when - audioCtx.currentTime;
+}
+function playNextTrack(){
+  if(!musicOn) return;
+  const t = MUSIC_TRACKS[musicTrack];
+  toast("🎵 " + t.name);
+  const len = scheduleTrack(t);
+  musicTrack = (musicTrack + 1) % MUSIC_TRACKS.length;
+  musicTimer = setTimeout(playNextTrack, (len + 1.4) * 1000);
+}
+function toggleMusic(){
+  if(musicOn){
+    musicOn = false;
+    clearTimeout(musicTimer);
+    if(musicGain){ try{ musicGain.disconnect(); }catch(e){} musicGain = null; }
+    $("musicbtn").classList.remove("playing");
+    $("musicbtn").textContent = "🎵";
+    return;
+  }
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 1;
+    musicGain.connect(audioCtx.destination);
+  }catch(e){ toast("Music is not supported in this browser"); return; }
+  musicOn = true;
+  $("musicbtn").classList.add("playing");
+  $("musicbtn").textContent = "⏸";
+  musicTrack = Math.floor(Math.random() * MUSIC_TRACKS.length);
+  playNextTrack();
+}
+$("musicbtn").addEventListener("click", toggleMusic);
+
+/* ---------------- pizzas 🍕 (Italian theme only) ---------------- */
+function reducedMotion(){
+  try{ return window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; }
+}
+function spawnPizza(dur){
+  if(!document.body.classList.contains("theme-it")) return;
+  if(reducedMotion() || document.hidden) return;
+  if(document.querySelectorAll(".pizza").length >= 12) return;
+  const p = document.createElement("span");
+  p.className = "pizza";
+  p.textContent = "🍕";
+  p.style.left = (4 + Math.random() * 90) + "vw";
+  p.style.fontSize = (22 + Math.random() * 16) + "px";
+  p.style.animationDuration = (dur || 11 + Math.random() * 8) + "s";
+  document.body.appendChild(p);
+  p.addEventListener("animationend", function(){ p.remove(); });
+}
+setInterval(spawnPizza, 7000);
+function pizzaBurst(){
+  for(let i = 0; i < 7; i++){
+    setTimeout(function(){ spawnPizza(2.6 + Math.random() * 1.6); }, i * 130);
+  }
+}
+
+/* ---------------- what's new panel ---------------- */
+function renderNotes(){
+  $("noteslist").innerHTML = PATCH_NOTES.map(function(n, i){
+    return '<div class="note">' +
+      '<div class="notehead"><b>v' + n.v + '</b> ' + esc(n.title) +
+      (i === 0 ? ' <span class="newtag">NEW</span>' : '') +
+      '<span class="notedate">' + esc(n.date) + '</span></div>' +
+      '<ul>' + n.items.map(function(it){ return '<li>' + esc(it) + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
+}
+function openNotes(){ renderNotes(); $("notes").classList.remove("hidden"); }
+function closeNotes(){ $("notes").classList.add("hidden"); }
+$("notesbtn").addEventListener("click", openNotes);
+$("notesclose").addEventListener("click", closeNotes);
+$("notes").addEventListener("click", function(e){ if(e.target === $("notes")) closeNotes(); });
 
 /* ---------------- init ---------------- */
 (function init(){
