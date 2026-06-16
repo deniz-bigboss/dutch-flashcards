@@ -10,14 +10,15 @@ Never mix the two.**
 
 ## Architecture
 
-- **The app lives in one static file: `index.html`** — CSS (dark theme only),
-  HTML, and a single `<script>`. No build step, no dependencies.
-- Four small sibling files exist only for offline/PWA install (the one
-  justified break from single-file — a service worker can't be inline):
-  `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`,
-  `apple-touch-icon.png`. The PNGs are a white paw on the brand gradient,
-  rasterized from an SVG via headless Chromium (see `/tmp/icon.html` recipe in
-  the v4.3 session); regenerate the same way if the brand changes.
+- **The app shell lives in one static file: `index.html`** — CSS (dark theme
+  only), HTML, and a single `<script>` (~20 KB gzipped). No build step.
+- Sibling files (the justified breaks from single-file):
+  - `deck-nl.js`, `deck-it.js` — the two 1000-word decks, lazy-loaded per
+    user so neither language burdens the other (see Word data rules).
+  - `sw.js` — service worker (can't be inline); `manifest.webmanifest`;
+    `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` — white paw on the
+    brand gradient, rasterized from an SVG via headless Chromium (recipe in the
+    v4.3 session); regenerate the same way if the brand changes.
 - **Service worker** (`sw.js`): stale-while-revalidate cache of the app shell —
   instant repeat loads + true offline, updates still arrive within one reload.
   Bump `CACHE_VERSION` in `sw.js` in step with `APP_VERSION` on notable changes.
@@ -27,8 +28,15 @@ Never mix the two.**
 
 ## Word data rules (validate after ANY data edit)
 
-- **Two decks**: `RAW_NL` (Dutch) and `RAW_IT` (Italian), same entry format:
+- **Two decks in their own files**: `deck-nl.js` (`window.RAW_NL`) and
+  `deck-it.js` (`window.RAW_IT`), same entry format:
   `["Level N", "headword", "english", "Sentence with *word* highlighted", "English sentence"]`
+- **Lazy-loaded per user**: `loadDeck()` injects only the logged-in user's deck
+  file (`DECKS[x].file`/`.global`); `boot()` awaits it, then `buildCards()` reads
+  `window[DECK.global]`. So the other language costs Deniz/Aruna *nothing* —
+  not download, parse, memory, nor SW cache (each device only ever fetches its
+  own deck; the SW caches it on first load). Validate decks with `node --check`
+  + a `new Function('window', …)` eval per file.
 - Card ids are `"w:" + headword` → **headwords must be unique within each
   deck** (duplicates silently merge progress). Decks live in separate
   per-user storage namespaces, so NL/IT collisions don't matter.
@@ -142,8 +150,10 @@ Never mix the two.**
 - v4.2: Web Audio chiptune player with public-domain Italian classics;
   floating pizzas + session-end pizza burst on theme-it; in-app "What's new"
   patch-notes panel (auto-opens once per version per user).
-- v4.3 (current): offline/PWA — `sw.js` (stale-while-revalidate),
+- v4.3: offline/PWA — `sw.js` (stale-while-revalidate),
   `manifest.webmanifest`, paw app icons; installs to home screen and works
-  with no network. Repeat loads served from cache. (Both decks still ship
-  in one file; splitting per-user was considered and declined — ~40 KB
-  gzipped saving wasn't worth breaking single-file + offline simplicity.)
+  with no network. Repeat loads served from cache.
+- v4.4 (current): split decks into `deck-nl.js`/`deck-it.js`, lazy-loaded per
+  user via `loadDeck()`. Each user now downloads ~59–60 KB gzipped (shell +
+  their deck) instead of ~99 KB, and never parses/stores the other language.
+  Brief "Loading your words…" paw splash on first (uncached) load.
