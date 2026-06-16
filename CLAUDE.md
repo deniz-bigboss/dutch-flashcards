@@ -62,6 +62,19 @@ Never mix the two.**
   (green/lime); the login screen (no user yet) uses the violet/pink brand
   gradient. All via CSS variables `--ac`/`--ac2`/`--hl`/`--glow1`/`--glow2`.
 
+## Level selection (multi-select)
+
+- `settings.cats` is an **array** of selected level/category names; empty = All.
+  (Migrated from the old single-string `settings.cat` in `boot()`.) The user
+  taps level chips to combine them (e.g. Level 1 + Level 3 = 400-word pool);
+  `#deckcount` shows the combined total.
+- `pool()` returns the union of selected cats (or everything when empty); all
+  study/practice/stats flow through it, so combining "just works".
+- `buildSession()` introduces **new** cards in level order for the default All
+  view (preserves the Level 1→5 curriculum) but **shuffles** new cards when a
+  specific selection is active, so combined levels actually interleave. Due
+  (already-seen) cards always interleave by date regardless.
+
 ## Spaced-repetition design (tuned for ~200 cards/day — same for both users)
 
 - `INTERVAL_DAYS = [0,1,3,7,14,30,60,120]`, boxes 0–7; a miss resets to box 0

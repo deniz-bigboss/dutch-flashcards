@@ -114,6 +114,11 @@
   .dchip{border:1px solid var(--line2);background:var(--card);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;color:var(--mut);font-family:inherit;transition:all .18s}
   .dchip:hover{border-color:var(--ac)}
   .dchip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#0b0d14;font-weight:700}
+  .dchipn{opacity:.6;font-size:11px;font-weight:700;margin-left:1px}
+  .dchip.on .dchipn{opacity:.85}
+  .deckcount{font-size:12.5px;color:var(--mut);margin:-4px 0 2px 86px}
+  .deckcount b{color:var(--hl)}
+  @media(max-width:430px){.deckcount{margin-left:0}}
   .chk{font-size:14px;color:var(--mut);display:flex;align-items:center;gap:8px;cursor:pointer}
   .bigbtn{
     display:block;width:100%;border:0;
@@ -417,9 +422,10 @@
         </div>
       </div>
       <div class="optrow">
-        <label>Deck</label>
+        <label>Levels</label>
         <div class="dchips" id="deckchips"></div>
       </div>
+      <div class="deckcount" id="deckcount"></div>
       <div class="optrow">
         <label></label>
         <label class="chk"><input type="checkbox" id="autospeak"> <span id="autospeaklbl">Auto-pronounce Dutch 🔊</span></label>
@@ -591,8 +597,12 @@ const LEVEL_DESC = {
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.4.0";
+const APP_VERSION = "4.5.0";
 const PATCH_NOTES = [
+  {v: "4.5.0", date: "16 June 2026", title: "Mix & match levels 🎚️", items: [
+    "🎚️ You can now combine levels! Tap more than one level (say Level 1 and Level 3) to study them together as one bigger deck — the count below shows how many words you've picked.",
+    "🔀 When you combine levels, new words are mixed across your picks instead of going one level at a time. Tap All to go back to the whole deck."
+  ]},
   {v: "4.4.0", date: "16 June 2026", title: "Lighter & faster ⚡", items: [
     "⚡ The app now loads only your own language's words, so it opens faster and uses less data — the other deck no longer comes along for the ride.",
     "🐾 A little loading paw appears for a moment the very first time, while your words download; after that it's instant and offline."
@@ -697,7 +707,7 @@ function migrateLegacy(){
 
 let progress = {};
 let custom   = [];
-let settings = {dir:"nl-en", cat:"All", autoSpeak:false};
+let settings = {dir:"nl-en", cats:[], autoSpeak:false};
 let streak   = {last:"", count:0};
 let daily    = {date:"", reviews:0, introduced:0};
 
@@ -729,8 +739,13 @@ function categories(){
   for(const c of allCards()) if(seen.indexOf(c.cat) === -1) seen.push(c.cat);
   return seen;
 }
+/* selected levels/categories — an empty list means "All". Multiple selected
+   levels combine into one bigger study pool (e.g. Level 1 + Level 3 = 400). */
+function selectedCats(){ return Array.isArray(settings.cats) ? settings.cats : []; }
 function pool(){
-  return settings.cat === "All" ? allCards() : allCards().filter(function(c){ return c.cat === settings.cat; });
+  const cats = selectedCats();
+  if(!cats.length) return allCards();
+  return allCards().filter(function(c){ return cats.indexOf(c.cat) !== -1; });
 }
 function globalCounts(){
   let neu = 0, learning = 0, known = 0;
@@ -772,8 +787,13 @@ function buildSession(){
   const dn = dueAndNew();
   let list = dn.due.slice(0, SESSION_SIZE);
   const newAllow = Math.max(0, DAILY_NEW - daily.introduced);
+  // For the default "All" view, introduce new words in level order (the
+  // intended Level 1 → 5 curriculum). When the user has deliberately combined
+  // specific levels, shuffle new cards so the combination actually interleaves.
+  let fresh = dn.fresh;
+  if(selectedCats().length > 0) fresh = shuffle(fresh.slice());
   let newCount = 0;
-  for(const c of dn.fresh){
+  for(const c of fresh){
     if(list.length >= SESSION_SIZE || newCount >= newAllow) break;
     list.push(c); newCount++;
   }
@@ -1015,11 +1035,32 @@ function renderDirSeg(){
   });
 }
 
+function catCount(cat){
+  let n = 0;
+  for(const c of allCards()) if(c.cat === cat) n++;
+  return n;
+}
 function renderDeckChips(){
-  const cats = ["All"].concat(categories());
-  $("deckchips").innerHTML = cats.map(function(c){
-    return '<button class="dchip' + (settings.cat === c ? " on" : "") + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+  const sel = selectedCats();
+  let html = '<button class="dchip' + (sel.length === 0 ? " on" : "") + '" data-cat="__all">All</button>';
+  html += categories().map(function(c){
+    const on = sel.indexOf(c) !== -1;
+    return '<button class="dchip' + (on ? " on" : "") + '" data-cat="' + esc(c) + '">' +
+           esc(c) + ' <span class="dchipn">' + catCount(c) + '</span></button>';
   }).join("");
+  $("deckchips").innerHTML = html;
+  renderDeckCount();
+}
+function renderDeckCount(){
+  const sel = selectedCats();
+  const n = pool().length;
+  let msg;
+  if(sel.length === 0){
+    msg = "All levels · <b>" + n + "</b> words";
+  }else{
+    msg = sel.length + " level" + (sel.length > 1 ? "s" : "") + " combined · <b>" + n + "</b> words";
+  }
+  $("deckcount").innerHTML = msg;
 }
 
 function renderCatSelect(){
@@ -1233,14 +1274,19 @@ async function boot(){
   migrateLegacy();
   progress = load(LSK.progress, {});
   custom   = load(LSK.custom, []);
-  settings = Object.assign({dir:"nl-en", cat:"All", autoSpeak:false}, load(LSK.settings, {}));
+  const storedSettings = load(LSK.settings, {});
+  settings = Object.assign({dir:"nl-en", cats:[], autoSpeak:false}, storedSettings);
+  // migrate the old single-select setting (settings.cat) to the multi-select list
+  if(!Array.isArray(settings.cats)){
+    settings.cats = (storedSettings.cat && storedSettings.cat !== "All") ? [storedSettings.cat] : [];
+  }
+  delete settings.cat;
   streak   = load(LSK.streak, {last:"", count:0});
   daily    = load(LSK.daily, {date:"", reviews:0, introduced:0});
   ensureToday();
-  if(settings.cat !== "All" && !allCards().some(function(c){ return c.cat === settings.cat; })){
-    settings.cat = "All";
-    save(LSK.settings, settings);
-  }
+  // drop any selected level/category that no longer exists in this deck
+  settings.cats = settings.cats.filter(function(c){ return allCards().some(function(x){ return x.cat === c; }); });
+  save(LSK.settings, settings);
   applyDeckUI();
   if(DECK === DECKS.it) initItalianExtras();
   else removeItalianExtras();
@@ -1281,7 +1327,15 @@ $("dirseg").addEventListener("click", function(e){
 $("deckchips").addEventListener("click", function(e){
   const b = e.target.closest("button[data-cat]");
   if(!b) return;
-  settings.cat = b.getAttribute("data-cat");
+  const cat = b.getAttribute("data-cat");
+  let cats = selectedCats().slice();
+  if(cat === "__all"){
+    cats = []; // back to the whole deck
+  }else{
+    const i = cats.indexOf(cat);
+    if(i === -1) cats.push(cat); else cats.splice(i, 1);
+  }
+  settings.cats = cats;
   save(LSK.settings, settings);
   renderDeckChips();
   renderStartInfo();
