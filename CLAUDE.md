@@ -10,11 +10,20 @@ Never mix the two.**
 
 ## Architecture
 
-- **Everything lives in one static file: `index.html`** — CSS (dark theme only),
-  HTML, and a single `<script>`. No build step, no dependencies, works offline.
+- **The app lives in one static file: `index.html`** — CSS (dark theme only),
+  HTML, and a single `<script>`. No build step, no dependencies.
+- Four small sibling files exist only for offline/PWA install (the one
+  justified break from single-file — a service worker can't be inline):
+  `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`,
+  `apple-touch-icon.png`. The PNGs are a white paw on the brand gradient,
+  rasterized from an SVG via headless Chromium (see `/tmp/icon.html` recipe in
+  the v4.3 session); regenerate the same way if the brand changes.
+- **Service worker** (`sw.js`): stale-while-revalidate cache of the app shell —
+  instant repeat loads + true offline, updates still arrive within one reload.
+  Bump `CACHE_VERSION` in `sw.js` in step with `APP_VERSION` on notable changes.
 - Deployed with GitHub Pages (Settings → Pages → `main` / root).
   Live at: https://deniz-bigboss.github.io/dutch-flashcards/
-- After editing `index.html`, just push — that's the whole deploy.
+- After editing, just push — that's the whole deploy.
 
 ## Word data rules (validate after ANY data edit)
 
@@ -130,6 +139,11 @@ Never mix the two.**
   (was called but never defined in v3).
 - v4.1: temp `yes` test account; `touch-action:manipulation` fix for
   double-tap zoom while petting; mobile flows verified in emulation.
-- v4.2 (current): Web Audio chiptune player with public-domain Italian
-  classics; floating pizzas + session-end pizza burst on theme-it; in-app
-  "What's new" patch-notes panel (auto-opens once per version per user).
+- v4.2: Web Audio chiptune player with public-domain Italian classics;
+  floating pizzas + session-end pizza burst on theme-it; in-app "What's new"
+  patch-notes panel (auto-opens once per version per user).
+- v4.3 (current): offline/PWA — `sw.js` (stale-while-revalidate),
+  `manifest.webmanifest`, paw app icons; installs to home screen and works
+  with no network. Repeat loads served from cache. (Both decks still ship
+  in one file; splitting per-user was considered and declined — ~40 KB
+  gzipped saving wasn't worth breaking single-file + offline simplicity.)

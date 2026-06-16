@@ -66,5 +66,7 @@ security** — never reuse a password you use anywhere else.
 ## Use it on your phone
 
 Open the live URL, log in, and use your browser's **"Add to Home Screen"** —
-it then opens full-screen like an app and works offline. (And yes, Pıtırcık
-loves finger taps just as much as mouse clicks.)
+it installs with its own paw icon, opens full-screen like a native app, and
+works **fully offline** thanks to a service worker (repeat opens are instant;
+updates download automatically on your next visit). And yes, Pıtırcık loves
+finger taps just as much as mouse clicks.

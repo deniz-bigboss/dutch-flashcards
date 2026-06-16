@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b0d14">
 <title>The Aru App · language flashcards</title>
-<link rel="icon" href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>'>
+<meta name="description" content="The Aru App — Dutch and Italian flashcards, 1000 words each, made for two.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Aru App">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>
   :root{
     color-scheme:dark;
@@ -2575,8 +2582,13 @@ const LEVEL_DESC = {
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.2.0";
+const APP_VERSION = "4.3.0";
 const PATCH_NOTES = [
+  {v: "4.3.0", date: "16 June 2026", title: "Works offline 📲", items: [
+    "📲 The app now installs as a real app and works fully offline. Add it to your home screen and it opens instantly — even with no signal.",
+    "⚡ Repeat visits load instantly from your device; new updates still arrive automatically on your next open.",
+    "🐾 Proper app icon on your home screen now too."
+  ]},
   {v: "4.2.0", date: "12 June 2026", title: "La Dolce Vita 🎶🍕", items: [
     "🎵 Italian music! Tap the round note button (bottom-left) for 8-bit arrangements of public-domain Italian classics — Funiculì Funiculà, Santa Lucia, the Tarantella and more. No copyright worries: the tunes are over a century old and the arrangements are generated right in your browser.",
     "🍕 Pizzas now drift gently across the Italian side of the app — and finishing a study session earns a little pizza party.",
@@ -3504,6 +3516,16 @@ $("notes").addEventListener("click", function(e){ if(e.target === $("notes")) cl
     try{ $("login-user").focus(); }catch(e){}
   }
 })();
+
+/* ---------------- service worker (offline + instant repeat loads) ----------------
+   Registered only over http(s); silently skipped on file:// and unsupported
+   browsers. The SW itself lives in sw.js (the one justified break from the
+   single-file rule — a service worker cannot be inline). */
+if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){ /* offline-first is best-effort */ });
+  });
+}
 </script>
 </body>
 </html>
