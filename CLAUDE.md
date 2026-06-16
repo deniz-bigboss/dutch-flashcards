@@ -49,6 +49,21 @@ Never mix the two.**
   L1 A1, L2 A2, L3 A2-B1, L4 B1, L5 B2. The 1000 commonest words span A1→B2
   and never reach C1 (that needs far rarer vocabulary). If the decks' content
   changes, re-judge these from the words rather than assuming a 1:1 ladder.
+
+## Part-of-speech colour coding
+
+- `posOf(headword, gloss, code)` classifies each word noun/verb/adj/adv/num/
+  other from the English gloss + headword — no per-word annotation. Strong
+  signals: gloss `the …` = noun, `to …` = verb; closed-class sets (`POS_*`)
+  catch numbers, days, adverbs, function words/interjections; IT also uses
+  article-led headwords + infinitive endings. The sets were **audited over all
+  2000 words** (script in the v4.7 session) — if you change deck content, re-run
+  that audit and patch the sets so the `adj`/`other` buckets stay clean.
+- `POS_META` holds the label + colour per type (noun blue, verb rose, adj
+  green, adv purple, num amber, other slate). The headword is tinted on the
+  flashcard (`.word span`) and word list (`.rtop b`); the card shows a `.postag`
+  pill, the word list a legend (`renderLegend()`). Colours are a fixed palette,
+  independent of the NL/IT theme accent.
 - Every target-language sentence wraps the word in `*asterisks*` (rendered as
   an accent-colored highlight; stripped before text-to-speech).
 - No double quotes inside the strings (JS data uses `"`); apostrophes are fine

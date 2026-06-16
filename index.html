@@ -124,6 +124,16 @@
   .dchip.on .cefr{color:#0b0d14;background:rgba(11,13,20,.16);border-color:rgba(11,13,20,.28)}
   .deckcount{font-size:12.5px;color:var(--mut);margin:-4px 0 2px 86px}
   .deckcount b{color:var(--hl)}
+  /* part-of-speech colour coding */
+  .metaleft{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+  .postag{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    border:1px solid;border-radius:6px;padding:1px 6px;background:rgba(255,255,255,.04)}
+  .posdot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .poslegend{display:flex;flex-wrap:wrap;gap:5px 12px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:9px 13px;margin-bottom:10px;font-size:12px;color:var(--mut)}
+  .posleglabel{font-weight:700;color:var(--dim);margin-right:2px}
+  .poslegitem{display:inline-flex;align-items:center;gap:5px}
   @media(max-width:430px){.deckcount{margin-left:0}}
   .chk{font-size:14px;color:var(--mut);display:flex;align-items:center;gap:8px;cursor:pointer}
   .bigbtn{
@@ -457,6 +467,7 @@
 
   <section id="panel-browse" class="panel">
     <input id="search" class="search" placeholder="Search Dutch or English…" autocomplete="off">
+    <div class="poslegend" id="poslegend"></div>
     <div id="list"></div>
   </section>
 
@@ -613,12 +624,60 @@ const LEVEL_CEFR = {
 };
 function cefr(cat){ return LEVEL_CEFR[cat] || ""; }
 
+/* ---------------- part of speech (colour-coded) ----------------
+   Each word is classified noun / verb / adjective / adverb / number / other
+   from its English gloss + headword (no per-word annotation needed). The gloss
+   is a strong signal ("the …" = noun, "to …" = verb); the rest are matched by
+   closed-class sets that work for both languages. Audited over all 2000 words. */
+const POS_META = {
+  noun:  {label:"noun",      color:"#60a5fa"},
+  verb:  {label:"verb",      color:"#fb7185"},
+  adj:   {label:"adjective", color:"#34d399"},
+  adv:   {label:"adverb",    color:"#c084fc"},
+  num:   {label:"number",    color:"#fbbf24"},
+  other: {label:"other",     color:"#94a3b8"}
+};
+const POS_NUM = new Set("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred thousand million".split(" "));
+const POS_NOUN_EXTRA = new Set("monday tuesday wednesday thursday friday saturday sunday noon midnight".split(" "));
+const POS_ADJ_LY = new Set(["friendly","lonely","ugly","lovely","likely","silly","lively","holy","early","daily","weekly","monthly"]);
+const POS_ADV = new Set(["here","there","now","then","today","tomorrow","yesterday","always","never","often","sometimes","very","well","too","also","already","again","almost","still","yet","soon","late","together","maybe","perhaps","immediately","quite","rather","hardly","nearly","finally","especially","usually","exactly","approximately","actually","namely","really","just","precisely","apparently","probably","absolutely","totally","completely","moreover","however","therefore","nevertheless","instead","anyway","besides","nearby","abroad","even","later","first","of course","indeed","after that","that is why","by the way","right away","at least","above all","for example","that is","in short","by now","on the contrary","otherwise","in the end","at the beginning","little by little","among other things","this morning","tonight","this evening","luckily","obviously"]);
+const POS_OTHER = new Set(["i","you","he","she","we","they","it","my","your","his","her","its","our","their","mine","yours","hers","ours","this","that","these","those","what","who","where","when","why","how","which","whom","whose","how much","how many","something","nothing","someone","somebody","nobody","anything","anyone","everything","everyone","all","both","each","every","some","any","none","other","another","much","many","few","more","most","less","a","an","the","enough","a lot of","and","or","but","because","if","so","although","though","while","unless","since","as","whether","that","for","as soon as","because of","because of that","in","on","at","with","without","of","from","by","to","into","under","over","above","below","behind","between","among","near","next to","beside","against","through","across","around","during","despite","according to","before","after","until","about","out","up","down","off","instead of","not","no","hello","hi","bye","goodbye","good morning","good evening","good night","good afternoon","good day","see you","thank you","thanks","please","you are welcome","sorry","excuse me","welcome","yes","okay","all right","help","cheers","bless you","attention","here it is","enjoy your meal","have a nice day","have a nice evening","have a good trip","good luck","happy birthday","how are you","how is it going","nice to meet you","what is your name","my name is","i do not understand","can you repeat","i do not know","do you speak english","all good","watch out","one / people","i am sorry","in my opinion","dunno","come on","oh well","oh my goodness","do not mention it","i cannot wait","how should i know","who knows","thank goodness","what a pity","how gross","like","not at all"]);
+const POS_IT_MODAL = new Set(["potere","volere","dovere","sapere"]);
+const POS_NL_MODAL = new Set(["kunnen","moeten","mogen","zullen"]);
+function posCanon(g){ return g.toLowerCase().replace(/\([^)]*\)/g," ").replace(/\s+/g," ").replace(/[.,!?]+$/,"").trim(); }
+function posOf(headword, gloss, code){
+  const hw = headword.toLowerCase().trim();
+  const g = gloss.toLowerCase().trim();
+  const c = posCanon(gloss);
+  const fs = c.split(/\s*[\/,]\s*/)[0].trim();
+  if(/\(interjection\)/.test(g)) return "other";
+  if(c.indexOf("see you") === 0) return "other";
+  if(!/people/.test(c) && (POS_NUM.has(fs) || /\b(hundred|thousand|million)\b/.test(c) || /^\d+$/.test(fs))) return "num";
+  if(POS_NOUN_EXTRA.has(fs)) return "noun";
+  if(/^to\s+[a-z]/.test(g)) return "verb";
+  if(code === "IT" && POS_IT_MODAL.has(hw)) return "verb";
+  if(code === "NL" && POS_NL_MODAL.has(hw)) return "verb";
+  if(/^the\s+[a-z]/.test(g)) return "noun";
+  if(code === "IT" && /^(il|lo|la|l'|i|gli|le|un|uno|una)\b/.test(hw) && /[ ']/.test(hw)) return "noun";
+  if(code === "NL" && /^(de|het|een)\s+\S/.test(hw)) return "noun";
+  if(code === "IT" && /^[a-zàèéìòù]+(are|ere|ire|arsi|ersi|irsi)$/.test(hw)) return "verb";
+  if(POS_ADV.has(fs) || POS_ADV.has(c) || (/ly$/.test(fs) && !POS_ADJ_LY.has(fs))) return "adv";
+  if(POS_OTHER.has(fs) || POS_OTHER.has(c)) return "other";
+  return "adj";
+}
+function cardPos(card){ return card.pos || (card.pos = posOf(card.nl, card.en, DECK.code)); }
+function posColor(card){ return POS_META[cardPos(card)].color; }
+
 /* ---------------- patch notes ----------------
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.6.0";
+const APP_VERSION = "4.7.0";
 const PATCH_NOTES = [
+  {v: "4.7.0", date: "16 June 2026", title: "Colour by word type 🎨", items: [
+    "🎨 Words are now coloured by their type — nouns, verbs, adjectives, adverbs, numbers and the rest each get their own colour, on the flashcards and in the word list.",
+    "🔵 noun · 🔴 verb · 🟢 adjective · 🟣 adverb · 🟡 number · ⚪ other. A little legend at the top of the word list reminds you which is which."
+  ]},
   {v: "4.6.0", date: "16 June 2026", title: "Know your level 🏅", items: [
     "🏅 Each level now shows its CEFR proficiency badge next to its name — on the level chips, on the flashcards, and in the word list.",
     "The badges reflect the real difficulty of the words: A1 (Level 1) → A2 → A2-B1 → B1 → B2 (Level 5). The 1000 most common words run from beginner up to upper-intermediate, so you can see exactly where each batch sits."
@@ -1002,8 +1061,10 @@ function faceHTML(card, which){
     ? '<div class="hintrow">tap the card (or press space) to flip</div>'
     : '<div class="hintrow">' + (session ? (session.total - session.doneCount) + " card" + (session.total - session.doneCount === 1 ? "" : "s") + " to go" : "") + '</div>';
   const catLabel = esc(card.cat) + (cefr(card.cat) ? ' <span class="cefr">' + cefr(card.cat) + '</span>' : '');
-  return '<div class="meta"><span class="cat">' + catLabel + '</span><span class="dots">' + dotsHTML(box) + '</span></div>' +
-         '<div class="main"><div class="word">' + esc(side.word) + spk + '</div>' + sent + '</div>' +
+  const pos = cardPos(card), pm = POS_META[pos];
+  const posTag = '<span class="postag" style="color:' + pm.color + ';border-color:' + pm.color + '55">' + pm.label + '</span>';
+  return '<div class="meta"><span class="metaleft"><span class="cat">' + catLabel + '</span>' + posTag + '</span><span class="dots">' + dotsHTML(box) + '</span></div>' +
+         '<div class="main"><div class="word"><span style="color:' + pm.color + '">' + esc(side.word) + '</span>' + spk + '</div>' + sent + '</div>' +
          hint;
 }
 
@@ -1096,6 +1157,12 @@ function renderCatSelect(){
   }).join("") + '<option value="__new">+ New category…</option>';
 }
 
+function renderLegend(){
+  $("poslegend").innerHTML = "<span class=\"posleglabel\">word types:</span>" + Object.keys(POS_META).map(function(k){
+    return '<span class="poslegitem"><span class="posdot" style="background:' + POS_META[k].color + '"></span>' + POS_META[k].label + '</span>';
+  }).join("");
+}
+
 function renderBrowse(){
   const q = $("search").value.trim().toLowerCase();
   const cards = allCards().filter(function(c){
@@ -1113,8 +1180,9 @@ function renderBrowse(){
     html += '<h3 class="ghead">' + label + ' <span>' + items.length + '</span></h3>';
     for(const c of items){
       const p = getProg(c.id);
+      const pm = POS_META[cardPos(c)];
       html += '<div class="row"><div class="rmain">' +
-        '<div class="rtop"><b>' + esc(c.nl) + '</b><span class="ren">' + esc(c.en) + '</span></div>' +
+        '<div class="rtop"><b style="color:' + pm.color + '">' + esc(c.nl) + '</b><span class="ren">' + esc(c.en) + '</span></div>' +
         ((c.nls || c.ens) ? '<div class="rsent">' + fmt(c.nls || "") + (c.ens ? ' <i>— ' + esc(plain(c.ens)) + '</i>' : '') + '</div>' : '') +
         '</div><div class="rside"><span class="dots">' + dotsHTML(p ? p.box : 0) + '</span>' +
         '<button class="spk" data-say="' + esc(plain(c.nl)) + '" title="Pronounce">🔊</button>' +
@@ -1322,6 +1390,7 @@ async function boot(){
   renderDeckChips();
   renderCatSelect();
   renderStartInfo();
+  renderLegend();
   renderBrowse();
   $("autospeak").checked = !!settings.autoSpeak;
   $("login").classList.add("hidden");
