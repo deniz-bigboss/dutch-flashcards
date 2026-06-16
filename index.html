@@ -116,6 +116,12 @@
   .dchip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#0b0d14;font-weight:700}
   .dchipn{opacity:.6;font-size:11px;font-weight:700;margin-left:1px}
   .dchip.on .dchipn{opacity:.85}
+  /* CEFR proficiency badge (A1…C1) shown next to level names */
+  .cefr{display:inline-block;font-size:.82em;font-weight:800;letter-spacing:.02em;
+    color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,transparent);
+    border:1px solid color-mix(in srgb,var(--ac) 42%,transparent);
+    border-radius:6px;padding:0 5px;vertical-align:middle;text-transform:none}
+  .dchip.on .cefr{color:#0b0d14;background:rgba(11,13,20,.16);border-color:rgba(11,13,20,.28)}
   .deckcount{font-size:12.5px;color:var(--mut);margin:-4px 0 2px 86px}
   .deckcount b{color:var(--hl)}
   @media(max-width:430px){.deckcount{margin-left:0}}
@@ -592,13 +598,27 @@ const LEVEL_DESC = {
   "Level 4": "Student life",
   "Level 5": "Society & fluency"
 };
+/* CEFR proficiency label shown next to each built-in level. 5 levels map to
+   A1, A2, B1, B2, C1 (the 1000 commonest words span beginner → upper-int.). */
+const LEVEL_CEFR = {
+  "Level 1": "A1",
+  "Level 2": "A2",
+  "Level 3": "B1",
+  "Level 4": "B2",
+  "Level 5": "C1"
+};
+function cefr(cat){ return LEVEL_CEFR[cat] || ""; }
 
 /* ---------------- patch notes ----------------
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.5.0";
+const APP_VERSION = "4.6.0";
 const PATCH_NOTES = [
+  {v: "4.6.0", date: "16 June 2026", title: "Know your level 🏅", items: [
+    "🏅 Each level now shows its CEFR proficiency badge (A1, A2, B1, B2, C1) next to its name — on the level chips, on the flashcards, and in the word list.",
+    "Level 1 = A1 (beginner) up to Level 5 = C1 (advanced), so you can see exactly where each batch of words sits."
+  ]},
   {v: "4.5.0", date: "16 June 2026", title: "Mix & match levels 🎚️", items: [
     "🎚️ You can now combine levels! Tap more than one level (say Level 1 and Level 3) to study them together as one bigger deck — the count below shows how many words you've picked.",
     "🔀 When you combine levels, new words are mixed across your picks instead of going one level at a time. Tap All to go back to the whole deck."
@@ -977,7 +997,8 @@ function faceHTML(card, which){
   const hint = which === "front"
     ? '<div class="hintrow">tap the card (or press space) to flip</div>'
     : '<div class="hintrow">' + (session ? (session.total - session.doneCount) + " card" + (session.total - session.doneCount === 1 ? "" : "s") + " to go" : "") + '</div>';
-  return '<div class="meta"><span class="cat">' + esc(card.cat) + '</span><span class="dots">' + dotsHTML(box) + '</span></div>' +
+  const catLabel = esc(card.cat) + (cefr(card.cat) ? ' <span class="cefr">' + cefr(card.cat) + '</span>' : '');
+  return '<div class="meta"><span class="cat">' + catLabel + '</span><span class="dots">' + dotsHTML(box) + '</span></div>' +
          '<div class="main"><div class="word">' + esc(side.word) + spk + '</div>' + sent + '</div>' +
          hint;
 }
@@ -1045,8 +1066,9 @@ function renderDeckChips(){
   let html = '<button class="dchip' + (sel.length === 0 ? " on" : "") + '" data-cat="__all">All</button>';
   html += categories().map(function(c){
     const on = sel.indexOf(c) !== -1;
+    const badge = cefr(c) ? ' <span class="cefr">' + cefr(c) + '</span>' : '';
     return '<button class="dchip' + (on ? " on" : "") + '" data-cat="' + esc(c) + '">' +
-           esc(c) + ' <span class="dchipn">' + catCount(c) + '</span></button>';
+           esc(c) + badge + ' <span class="dchipn">' + catCount(c) + '</span></button>';
   }).join("");
   $("deckchips").innerHTML = html;
   renderDeckCount();
@@ -1082,7 +1104,8 @@ function renderBrowse(){
   }
   let html = "";
   byCat.forEach(function(items, cat){
-    const label = LEVEL_DESC[cat] ? esc(cat) + " — " + LEVEL_DESC[cat] : esc(cat);
+    const badge = cefr(cat) ? ' <span class="cefr">' + cefr(cat) + '</span>' : '';
+    const label = (LEVEL_DESC[cat] ? esc(cat) + badge + " — " + LEVEL_DESC[cat] : esc(cat) + badge);
     html += '<h3 class="ghead">' + label + ' <span>' + items.length + '</span></h3>';
     for(const c of items){
       const p = getProg(c.id);
