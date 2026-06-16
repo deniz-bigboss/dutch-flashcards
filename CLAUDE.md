@@ -110,6 +110,12 @@ Never mix the two.**
 
 ## Italian extras (theme-it only)
 
+- **Gated to the Italian deck.** `boot()` calls `initItalianExtras()` only when
+  `DECK === DECKS.it` (wires the music/dog listeners, starts the pizza timer);
+  for the Dutch user it calls `removeItalianExtras()` instead, which deletes
+  `#musicbtn` and `#dog` from the DOM. So Deniz runs **zero** Italian-only code:
+  no recurring pizza timer, no listeners, no dog/music DOM. Keep any new
+  Italian-only feature inside this gate (don't attach it at parse time).
 - **Music 🎵**: `MUSIC_TRACKS` + a tiny Web Audio chiptune sequencer (square
   wave, note strings like `"E4:.5 R:1"`). Round button bottom-left, visible
   only with `body.theme-it`; starts on tap (autoplay policies), toast shows
@@ -117,15 +123,18 @@ Never mix the two.**
   ⚠️ Never add 'O Sole Mio — an Italian court ruling (Mazzucchi) keeps it in
   copyright until ~2042. Current playlist: Funiculì Funiculà, Santa Lucia,
   Tarantella Napoletana, La donna è mobile, Torna a Surriento.
-- **Pizzas 🍕**: `spawnPizza()` drifts emoji up the screen every ~7s
-  (`z-index:2`, `pointer-events:none`, capped at 12); `pizzaBurst()` fires on
-  Italian session completion. Both skip when `prefers-reduced-motion`.
+- **Pizzas 🍕**: `spawnPizza()` drifts emoji up the screen every ~7s via a timer
+  started only for Italian (`z-index:2`, `pointer-events:none`, capped at 12);
+  `pizzaBurst()` fires on Italian session completion. Both skip when
+  `prefers-reduced-motion`.
 
 ## Pıtırcık 🐶 (Aruna's dog)
 
 - Inline SVG in `index.html` (`#dog`, fixed bottom-right), visible only with
   `body.user-aruna`. Click/tap/Enter = pet: squash-wiggle, tongue out, faster
-  tail wag, floating hearts, sometimes a "Bau!" bubble.
+  tail wag, floating hearts, sometimes a "Bau!" bubble. Listeners are attached
+  only for the Italian deck (`initItalianExtras()`); removed from the DOM for
+  the Dutch user.
 - Pet count persists in Aruna's `settings.pets`; every 50th pet shows a toast.
 - Idle animations (breathe/wag/blink) are pure CSS; respects
   `prefers-reduced-motion`.

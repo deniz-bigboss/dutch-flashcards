@@ -1242,6 +1242,8 @@ async function boot(){
     save(LSK.settings, settings);
   }
   applyDeckUI();
+  if(DECK === DECKS.it) initItalianExtras();
+  else removeItalianExtras();
   renderStats();
   renderDirSeg();
   renderDeckChips();
@@ -1379,8 +1381,6 @@ function petDog(){
   $("dog").title = "Pıtırcık · petted " + settings.pets + " time" + (settings.pets === 1 ? "" : "s");
   if(settings.pets % 50 === 0) toast("Pıtırcık has been petted " + settings.pets + " times. He loves you! 🐶❤️");
 }
-$("dog").addEventListener("click", petDog);
-$("dog").addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); petDog(); } });
 
 document.addEventListener("keydown", function(e){
   const tag = e.target.tagName;
@@ -1481,7 +1481,6 @@ function toggleMusic(){
   musicTrack = Math.floor(Math.random() * MUSIC_TRACKS.length);
   playNextTrack();
 }
-$("musicbtn").addEventListener("click", toggleMusic);
 
 /* ---------------- pizzas 🍕 (Italian theme only) ---------------- */
 function reducedMotion(){
@@ -1500,11 +1499,29 @@ function spawnPizza(dur){
   document.body.appendChild(p);
   p.addEventListener("animationend", function(){ p.remove(); });
 }
-setInterval(spawnPizza, 7000);
 function pizzaBurst(){
   for(let i = 0; i < 7; i++){
     setTimeout(function(){ spawnPizza(2.6 + Math.random() * 1.6); }, i * 130);
   }
+}
+
+/* ---------------- Italian extras: activate only for the Italian deck ----------------
+   For the Dutch user (Deniz) none of this runs: the music button and the dog
+   are removed from his DOM, no pet/music listeners are attached, and the pizza
+   timer never starts — so his app carries zero cost for Italian-only features. */
+let _extrasInit = false, _pizzaTimer = null;
+function initItalianExtras(){
+  if(_extrasInit) return;
+  _extrasInit = true;
+  $("musicbtn").addEventListener("click", toggleMusic);
+  $("dog").addEventListener("click", petDog);
+  $("dog").addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); petDog(); } });
+  _pizzaTimer = setInterval(spawnPizza, 7000);
+}
+function removeItalianExtras(){
+  // literally delete the Italian-only widgets for the Dutch user
+  const m = $("musicbtn"); if(m) m.remove();
+  const d = $("dog"); if(d) d.remove();
 }
 
 /* ---------------- what's new panel ---------------- */
