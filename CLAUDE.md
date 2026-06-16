@@ -42,9 +42,13 @@ Never mix the two.**
   per-user storage namespaces, so NL/IT collisions don't matter.
 - **Exactly 200 words per level**, 5 levels per deck: 1 Survival basics ·
   2 Daily life · 3 People & conversation · 4 Student life · 5 Society & fluency.
-- `LEVEL_DESC` (name) and `LEVEL_CEFR` (A1/A2/B1/B2/C1 badge) map each level;
+- `LEVEL_DESC` (name) and `LEVEL_CEFR` (proficiency badge) map each level;
   `cefr(cat)` is shown next to the level on the chips, flashcards and word
   list (via the `.cefr` pill). Custom categories have no badge.
+- CEFR badges reflect the **actual** word difficulty, not a tidy A1→C1 ramp:
+  L1 A1, L2 A2, L3 A2-B1, L4 B1, L5 B2. The 1000 commonest words span A1→B2
+  and never reach C1 (that needs far rarer vocabulary). If the decks' content
+  changes, re-judge these from the words rather than assuming a 1:1 ladder.
 - Every target-language sentence wraps the word in `*asterisks*` (rendered as
   an accent-colored highlight; stripped before text-to-speech).
 - No double quotes inside the strings (JS data uses `"`); apostrophes are fine

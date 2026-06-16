@@ -598,14 +598,18 @@ const LEVEL_DESC = {
   "Level 4": "Student life",
   "Level 5": "Society & fluency"
 };
-/* CEFR proficiency label shown next to each built-in level. 5 levels map to
-   A1, A2, B1, B2, C1 (the 1000 commonest words span beginner → upper-int.). */
+/* CEFR proficiency label shown next to each built-in level. These reflect the
+   ACTUAL difficulty of the words (judged from the content), not a tidy A1→C1
+   ramp: the 1000 commonest words run from A1 up to about B2 and never reach C1.
+   L1 greetings/numbers = A1; L2 everyday concrete = A2; L3 feelings/health/
+   hobbies straddle A2–B1; L4 study/admin/work = B1; L5 society/abstract/
+   connectors/idioms = B2. */
 const LEVEL_CEFR = {
   "Level 1": "A1",
   "Level 2": "A2",
-  "Level 3": "B1",
-  "Level 4": "B2",
-  "Level 5": "C1"
+  "Level 3": "A2-B1",
+  "Level 4": "B1",
+  "Level 5": "B2"
 };
 function cefr(cat){ return LEVEL_CEFR[cat] || ""; }
 
@@ -616,8 +620,8 @@ function cefr(cat){ return LEVEL_CEFR[cat] || ""; }
 const APP_VERSION = "4.6.0";
 const PATCH_NOTES = [
   {v: "4.6.0", date: "16 June 2026", title: "Know your level 🏅", items: [
-    "🏅 Each level now shows its CEFR proficiency badge (A1, A2, B1, B2, C1) next to its name — on the level chips, on the flashcards, and in the word list.",
-    "Level 1 = A1 (beginner) up to Level 5 = C1 (advanced), so you can see exactly where each batch of words sits."
+    "🏅 Each level now shows its CEFR proficiency badge next to its name — on the level chips, on the flashcards, and in the word list.",
+    "The badges reflect the real difficulty of the words: A1 (Level 1) → A2 → A2-B1 → B1 → B2 (Level 5). The 1000 most common words run from beginner up to upper-intermediate, so you can see exactly where each batch sits."
   ]},
   {v: "4.5.0", date: "16 June 2026", title: "Mix & match levels 🎚️", items: [
     "🎚️ You can now combine levels! Tap more than one level (say Level 1 and Level 3) to study them together as one bigger deck — the count below shows how many words you've picked.",
