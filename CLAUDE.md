@@ -160,10 +160,12 @@ Never mix the two.**
     `localStorage["woordjes.claim.aruna"]` (min 4 chars); afterwards the
     password must match the claim. The claim is per device (no server) — on a
     new device she claims again with the same credentials and imports a backup.
-  - `yes` (display "Yes (test)", deck `it`, password `yes`): **TEMPORARY**
-    test account so Deniz can preview the Italian experience (incl. Pıtırcık,
-    via the `dog:true` flag) without claiming Aruna's profile. Remove the
-    `ACCOUNTS` entry when testing is done.
+  - `yes` (display "Yes (test)", deck `it`, password `yes`) and `no` (display
+    "No (test)", deck `nl`, password `no`): **TEMPORARY** test accounts to
+    preview/verify the Italian (`yes`, incl. Pıtırcık via `dog:true`) and Dutch
+    (`no`, no Italian extras) experiences without touching real profiles.
+    Remove both `ACCOUNTS` entries (and `woordjes.yes.*`/`woordjes.no.*` keys)
+    when testing is done.
   - Any other name → rejected with a friendly "private app" message.
 - Storage is namespaced per user: `localStorage` keys
   `woordjes.<user>.{progress,custom,settings,streak,daily}` (keys keep the
