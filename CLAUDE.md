@@ -64,6 +64,10 @@ Never mix the two.**
   flashcard (`.word span`) and word list (`.rtop b`); the card shows a `.postag`
   pill, the word list a legend (`renderLegend()`). Colours are a fixed palette,
   independent of the NL/IT theme accent.
+- The `*highlighted*` word inside each example sentence is also tinted its POS
+  colour: `fmt(sentence, posColor(card))` passes the colour into the `.hl` span
+  (flashcard + word list), so the word matches everywhere. `.sent`'s left
+  border still uses the theme accent.
 - Every target-language sentence wraps the word in `*asterisks*` (rendered as
   an accent-colored highlight; stripped before text-to-speech).
 - No double quotes inside the strings (JS data uses `"`); apostrophes are fine

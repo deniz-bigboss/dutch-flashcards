@@ -675,7 +675,7 @@ function posColor(card){ return POS_META[cardPos(card)].color; }
 const APP_VERSION = "4.7.0";
 const PATCH_NOTES = [
   {v: "4.7.0", date: "16 June 2026", title: "Colour by word type 🎨", items: [
-    "🎨 Words are now coloured by their type — nouns, verbs, adjectives, adverbs, numbers and the rest each get their own colour, on the flashcards and in the word list.",
+    "🎨 Words are now coloured by their type — nouns, verbs, adjectives, adverbs, numbers and the rest each get their own colour, on the flashcards, inside the example sentences, and in the word list.",
     "🔵 noun · 🔴 verb · 🟢 adjective · 🟣 adverb · 🟡 number · ⚪ other. A little legend at the top of the word list reminds you which is which."
   ]},
   {v: "4.6.0", date: "16 June 2026", title: "Know your level 🏅", items: [
@@ -1031,7 +1031,7 @@ function toast(msg){
   toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
 }
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-function fmt(s){ return esc(s).replace(/\*([^*]+)\*/g, '<b class="hl">$1</b>'); }
+function fmt(s, color){ const st = color ? ' style="color:' + color + '"' : ''; return esc(s).replace(/\*([^*]+)\*/g, '<b class="hl"' + st + '>$1</b>'); }
 function plain(s){ return String(s).replace(/\*/g, ""); }
 
 function sideFor(card, which){
@@ -1053,7 +1053,7 @@ function faceHTML(card, which){
   const box = p ? p.box : 0;
   const spk = side.dutch ? ' <button class="spk" data-say="' + esc(plain(side.word)) + '" title="Pronounce">🔊</button>' : "";
   const sent = side.sent
-    ? '<div class="sent">' + fmt(side.sent) +
+    ? '<div class="sent">' + fmt(side.sent, posColor(card)) +
       (side.dutch ? ' <button class="spk small" data-say="' + esc(plain(side.sent)) + '" title="Pronounce sentence">🔊</button>' : "") +
       '</div>'
     : "";
@@ -1183,7 +1183,7 @@ function renderBrowse(){
       const pm = POS_META[cardPos(c)];
       html += '<div class="row"><div class="rmain">' +
         '<div class="rtop"><b style="color:' + pm.color + '">' + esc(c.nl) + '</b><span class="ren">' + esc(c.en) + '</span></div>' +
-        ((c.nls || c.ens) ? '<div class="rsent">' + fmt(c.nls || "") + (c.ens ? ' <i>— ' + esc(plain(c.ens)) + '</i>' : '') + '</div>' : '') +
+        ((c.nls || c.ens) ? '<div class="rsent">' + fmt(c.nls || "", pm.color) + (c.ens ? ' <i>— ' + esc(plain(c.ens)) + '</i>' : '') + '</div>' : '') +
         '</div><div class="rside"><span class="dots">' + dotsHTML(p ? p.box : 0) + '</span>' +
         '<button class="spk" data-say="' + esc(plain(c.nl)) + '" title="Pronounce">🔊</button>' +
         (c.builtin ? '' : '<button class="del" data-del="' + esc(c.id) + '" title="Delete word">🗑</button>') +
