@@ -69,6 +69,22 @@ Never mix the two.**
   (flashcard + word list), so the word matches everywhere. `.sent`'s left
   border still uses the theme accent.
 
+## Reading passages
+
+- Short A1/A2 texts in `window.READ_NL` / `window.READ_IT`, appended to the
+  deck files (so they lazy-load per user — Deniz never fetches Italian texts).
+  Config via `DECK.readGlobal`. Each: `{lvl,icon,title,text,en,q:[{q,o,c}]}`.
+- "Read" tab → `renderReadList()` (passage cards) and `openPassage()` (reader:
+  tappable words, Listen/Translation, comprehension MCQs).
+- Tapping a word calls `showGloss()`: pronounces it and looks it up in
+  `READ_LOOKUP` — a map built lazily from the deck (headword, article-stripped
+  variant) **plus every verb's present-tense forms via `conjugate()`**, so
+  inflected verbs resolve to their infinitive gloss. Lookup is invalidated
+  (`READ_LOOKUP = null`) in `boot()` and after `addWord()`.
+- Passages use mostly deck vocabulary + present tense; if you change decks,
+  unknown words just won't gloss (they still pronounce). To add passages,
+  append objects to the arrays in the deck files (no straight `"` — use « »).
+
 ## Verb conjugation (present indicative)
 
 - Decks store only the infinitive, so `conjugate(headword, code)` GENERATES the

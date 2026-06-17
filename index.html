@@ -188,6 +188,44 @@
   .conjp{font-size:12.5px;color:var(--dim)}
   .conjf{font-size:14.5px;font-weight:700}
   @media(max-width:430px){.conjgrid{grid-template-columns:auto 1fr;gap:6px 8px}}
+
+  /* reading passages */
+  .readintro{font-size:13px;color:var(--mut);line-height:1.5;margin:2px 4px 12px}
+  .readcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin-bottom:9px;
+    color:var(--txt);font-family:inherit;transition:border-color .18s,transform .12s}
+  .readcard:hover{border-color:var(--ac)} .readcard:active{transform:scale(.99)}
+  .readicon{font-size:26px;flex-shrink:0}
+  .readcardmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .readcardmain b{font-size:15.5px}
+  .readprev{font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .readhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .readhead h2{margin:0;font-size:20px;flex:1}
+  .readtools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+  .rtool{border:1px solid var(--line2);background:var(--card);color:var(--mut);border-radius:99px;
+    padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .18s}
+  .rtool:hover{border-color:var(--ac)} .rtool.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#0b0d14}
+  .readtip{font-size:11.5px;color:var(--dim);flex:1;min-width:120px}
+  .readtext{font-size:18px;line-height:1.85;color:#dfe4ee}
+  .readtext .rw{cursor:pointer;border-radius:4px;padding:0 1px;transition:background .12s,color .12s}
+  .readtext .rw:hover{background:rgba(255,255,255,.06)}
+  .readtext .rw.on{background:color-mix(in srgb,var(--ac) 30%,transparent);color:#fff}
+  .readen{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.6;color:var(--mut)}
+  .readgloss{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:35;
+    display:flex;align-items:center;gap:9px;max-width:92vw;
+    background:#141826f2;border:1px solid var(--line2);border-radius:14px;padding:10px 15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .readgloss b{font-size:16px;font-weight:800}
+  .glosspos{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border:1px solid;border-radius:5px;padding:1px 5px}
+  .glossen{font-size:14px;color:var(--txt)} .glossspk{font-size:16px}
+  .qbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-top:10px}
+  .qtext{font-size:14.5px;font-weight:700;margin-bottom:9px}
+  .qopt{display:block;width:100%;text-align:left;background:rgba(0,0,0,.2);border:1px solid var(--line2);
+    color:var(--txt);border-radius:10px;padding:10px 12px;margin-bottom:7px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s}
+  .qopt:hover{border-color:var(--ac)}
+  .qbox.answered .qopt{cursor:default}
+  .qopt.right{background:rgba(34,197,94,.18);border-color:#22c55e;color:#86efac;font-weight:700}
+  .qopt.wrong{background:rgba(244,93,62,.16);border-color:#f45d3e;color:#ff9d87}
   .hintrow{text-align:center;font-size:12px;color:var(--dim);min-height:15px}
   .controls{display:flex;gap:10px}
   .controls .bigbtn{margin-top:0}
@@ -427,8 +465,9 @@
 
   <nav class="tabs">
     <button class="tab on" data-tab="study">Study</button>
-    <button class="tab" data-tab="browse">Word list</button>
-    <button class="tab" data-tab="add">Add words</button>
+    <button class="tab" data-tab="read">Read</button>
+    <button class="tab" data-tab="browse">Words</button>
+    <button class="tab" data-tab="add">Add</button>
   </nav>
 
   <section id="panel-study" class="panel on">
@@ -472,6 +511,28 @@
     </div>
 
     <div id="done" class="hidden box center"></div>
+  </section>
+
+  <section id="panel-read" class="panel">
+    <div id="readlist"></div>
+    <div id="readview" class="hidden">
+      <button class="linkbtn" id="readback" style="margin:0 0 10px;text-align:left">← all passages</button>
+      <div class="box">
+        <div class="readhead">
+          <h2 id="readtitle"></h2>
+          <span class="cefr" id="readcefr"></span>
+        </div>
+        <div class="readtools">
+          <button class="rtool" id="readlisten">🔊 Listen</button>
+          <button class="rtool" id="readtrans">🇬🇧 Translation</button>
+          <span class="readtip">tap any word for its meaning</span>
+        </div>
+        <div class="readtext" id="readtext"></div>
+        <div class="readen hidden" id="readen"></div>
+      </div>
+      <div id="readq"></div>
+    </div>
+    <div class="readgloss hidden" id="readgloss"></div>
   </section>
 
   <section id="panel-browse" class="panel">
@@ -573,13 +634,13 @@
    Card fields keep the historic names nl/nls = target-language word/sentence,
    whatever the deck language actually is (Dutch for Deniz, Italian for Aruna). */
 const DECKS = {
-  nl: {code:"NL", flag:"🇳🇱", name:"Dutch", lang:"nl-NL", voiceRe:/^nl/i, file:"deck-nl.js", global:"RAW_NL",
+  nl: {code:"NL", flag:"🇳🇱", name:"Dutch", lang:"nl-NL", voiceRe:/^nl/i, file:"deck-nl.js", global:"RAW_NL", readGlobal:"READ_NL",
        greeting:"Klaar om te leren?",
        sub:"1000 essential Dutch words · in context",
        searchPh:"Search Dutch or English…",
        phWord:"de fietsenmaker", phEn:"the bicycle repairman",
        phSent:"Mijn fiets staat bij de *fietsenmaker*.", phEnSent:"My bike is at the bicycle repairman."},
-  it: {code:"IT", flag:"🇮🇹", name:"Italian", lang:"it-IT", voiceRe:/^it/i, file:"deck-it.js", global:"RAW_IT",
+  it: {code:"IT", flag:"🇮🇹", name:"Italian", lang:"it-IT", voiceRe:/^it/i, file:"deck-it.js", global:"RAW_IT", readGlobal:"READ_IT",
        greeting:"Pronti a imparare?",
        sub:"1000 essential Italian words · in context",
        searchPh:"Search Italian or English…",
@@ -763,8 +824,13 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.8.0";
+const APP_VERSION = "4.9.0";
 const PATCH_NOTES = [
+  {v: "4.9.0", date: "17 June 2026", title: "Reading! 📚", items: [
+    "📚 New Read tab! Six short A1/A2 stories built from the words you're learning — a self-intro, a day at the café, your apartment, a trip to the sea, and more (Aruna even gets a story about Pıtırcık 🐶).",
+    "👆 Tap any word while reading to hear it and see its meaning + type — even conjugated verbs (tap “studio” and you'll see “to study”).",
+    "🇬🇧 A Translation button, a Listen button, and two quick comprehension questions per story."
+  ]},
   {v: "4.8.0", date: "16 June 2026", title: "Verb conjugations 📖", items: [
     "📖 Verbs now show their present-tense conjugation! On a verb card, tap “conjugation · present” to see all six forms (io/tu/lui… or ik/jij/hij…).",
     "Reflexives (mi sveglio…), Italian -isc verbs (capisco), and Dutch separable verbs (sta op) and irregulars (ben, heb) are all handled — every verb in both decks was checked by hand."
@@ -1289,6 +1355,100 @@ function renderBrowse(){
   $("list").innerHTML = html || '<p class="empty">No matches.</p>';
 }
 
+/* ---------------- reading passages ----------------
+   Short A1/A2 texts built from the deck's vocabulary. Every word is tappable:
+   it's pronounced and (when the word or its lemma is in the deck) glossed with
+   its English meaning + part-of-speech colour. Verb present-tense forms are
+   indexed back to their infinitive via the conjugator, so e.g. "mangia" finds
+   "mangiare = to eat". */
+let READ_LOOKUP = null, currentPassage = -1;
+const ART_RE = /^(de|het|een|il|lo|la|l'|i|gli|le|un|uno|una)\s+/;
+function normWord(w){ return w.toLowerCase().replace(/^l['']/,"").replace(/[^a-zà-ÿ]/gi,"").trim(); }
+function buildReadLookup(){
+  READ_LOOKUP = new Map();
+  function put(key, en, pos){ key = normWord(key); if(key && !READ_LOOKUP.has(key)) READ_LOOKUP.set(key, {en:en, pos:pos}); }
+  for(const c of allCards()){
+    const pos = cardPos(c);
+    put(c.nl, c.en, pos);
+    const noArt = c.nl.replace(ART_RE, "").replace(/^l['']/,"");
+    if(noArt !== c.nl) put(noArt, c.en, pos);
+    if(pos === "verb"){
+      const forms = conjugate(c.nl, DECK.code);
+      if(forms) forms.forEach(function(f){
+        const parts = f.split(" ");
+        // reflexive "mi sveglio" -> sveglio ; separable "sta op" -> sta
+        const word = (parts.length > 1 && /^(mi|ti|si|ci|vi)$/.test(parts[0])) ? parts[1] : parts[0];
+        put(word, c.en, "verb");
+      });
+    }
+  }
+}
+function lookupWord(w){ if(!READ_LOOKUP) buildReadLookup(); return READ_LOOKUP.get(normWord(w)) || null; }
+
+function passages(){ return window[DECK.readGlobal] || []; }
+function renderReadList(){
+  const ps = passages();
+  $("readview").classList.add("hidden");
+  $("readlist").classList.remove("hidden");
+  $("readgloss").classList.add("hidden");
+  $("readlist").innerHTML = '<p class="readintro">📚 Short stories built from your words. Tap any word while reading to hear it and see what it means.</p>' +
+    ps.map(function(p, i){
+      return '<button class="readcard" data-p="' + i + '">' +
+        '<span class="readicon">' + p.icon + '</span>' +
+        '<span class="readcardmain"><b>' + esc(p.title) + '</b><span class="readprev">' + esc(p.text.slice(0, 52)) + '…</span></span>' +
+        '<span class="cefr">' + p.lvl + '</span></button>';
+    }).join("");
+}
+function tokenizeInto(el, text){
+  el.innerHTML = "";
+  const parts = text.split(/(\s+)/);
+  parts.forEach(function(tok){
+    if(/^\s+$/.test(tok)){ el.appendChild(document.createTextNode(tok)); return; }
+    // keep leading/trailing punctuation outside the tappable span
+    const m = tok.match(/^([^\wà-ÿ«»]*)([\wà-ÿ''-]*)([^\wà-ÿ«»]*)$/i);
+    if(!m || !m[2]){ el.appendChild(document.createTextNode(tok)); return; }
+    if(m[1]) el.appendChild(document.createTextNode(m[1]));
+    const span = document.createElement("span");
+    span.className = "rw"; span.textContent = m[2];
+    el.appendChild(span);
+    if(m[3]) el.appendChild(document.createTextNode(m[3]));
+  });
+}
+function openPassage(i){
+  const p = passages()[i];
+  if(!p) return;
+  currentPassage = i;
+  $("readlist").classList.add("hidden");
+  $("readview").classList.remove("hidden");
+  $("readtitle").textContent = p.icon + " " + p.title;
+  $("readcefr").textContent = p.lvl;
+  tokenizeInto($("readtext"), p.text);
+  $("readen").textContent = p.en;
+  $("readen").classList.add("hidden");
+  $("readtrans").classList.remove("on");
+  $("readgloss").classList.add("hidden");
+  $("readq").innerHTML = p.q.map(function(q, qi){
+    return '<div class="qbox" data-q="' + qi + '"><div class="qtext">' + esc(q.q) + '</div>' +
+      q.o.map(function(o, oi){ return '<button class="qopt" data-o="' + oi + '">' + esc(o) + '</button>'; }).join("") +
+      '</div>';
+  }).join("");
+  try{ window.scrollTo(0, 0); }catch(e){}
+}
+function showGloss(word){
+  const g = lookupWord(word);
+  const bar = $("readgloss");
+  if(g){
+    const pm = POS_META[g.pos];
+    bar.innerHTML = '<b style="color:' + pm.color + '">' + esc(word) + '</b>' +
+      '<span class="glosspos" style="color:' + pm.color + ';border-color:' + pm.color + '55">' + pm.label + '</span>' +
+      '<span class="glossen">' + esc(g.en) + '</span><span class="glossspk">🔊</span>';
+  }else{
+    bar.innerHTML = '<b>' + esc(word) + '</b><span class="glossen">— tap to hear it</span><span class="glossspk">🔊</span>';
+  }
+  bar.classList.remove("hidden");
+  speak(word);
+}
+
 /* ---------------- speech ---------------- */
 let voices = [];
 function loadVoices(){ try{ voices = speechSynthesis.getVoices(); }catch(e){} }
@@ -1320,6 +1480,7 @@ function addWord(){
   save(LSK.custom, custom);
   ["f-nl", "f-en", "f-nls", "f-ens", "f-newcat"].forEach(function(id){ $(id).value = ""; });
   toast('Added "' + nl + '" 🎉');
+  READ_LOOKUP = null;
   renderStats(); renderStartInfo(); renderDeckChips(); renderCatSelect(); renderBrowse();
 }
 
@@ -1462,6 +1623,7 @@ async function boot(){
     toast("Couldn't load the " + DECK.name + " words — connect to the internet once to download them.");
   }
   buildCards();
+  READ_LOOKUP = null;
   migrateLegacy();
   progress = load(LSK.progress, {});
   custom   = load(LSK.custom, []);
@@ -1504,7 +1666,48 @@ document.querySelectorAll(".tab").forEach(function(t){
     document.querySelectorAll(".tab").forEach(function(x){ x.classList.toggle("on", x === t); });
     document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("on"); });
     $("panel-" + t.getAttribute("data-tab")).classList.add("on");
-    if(t.getAttribute("data-tab") === "browse") renderBrowse();
+    const tab = t.getAttribute("data-tab");
+    if(tab === "browse") renderBrowse();
+    if(tab === "read") renderReadList();
+  });
+});
+
+$("readlist").addEventListener("click", function(e){
+  const b = e.target.closest(".readcard");
+  if(b) openPassage(parseInt(b.getAttribute("data-p"), 10));
+});
+$("readback").addEventListener("click", renderReadList);
+$("readtext").addEventListener("click", function(e){
+  const w = e.target.closest(".rw");
+  if(!w) return;
+  document.querySelectorAll("#readtext .rw.on").forEach(function(x){ x.classList.remove("on"); });
+  w.classList.add("on");
+  showGloss(w.textContent);
+});
+$("readgloss").addEventListener("click", function(){
+  const b = $("readgloss").querySelector("b");
+  if(b) speak(b.textContent);
+});
+$("readtrans").addEventListener("click", function(){
+  const on = $("readen").classList.toggle("hidden");
+  $("readtrans").classList.toggle("on", !on);
+});
+$("readlisten").addEventListener("click", function(){
+  const p = passages()[currentPassage];
+  if(p) speak(plain(p.text));
+});
+$("readq").addEventListener("click", function(e){
+  const opt = e.target.closest(".qopt");
+  if(!opt) return;
+  const box = opt.closest(".qbox");
+  if(box.classList.contains("answered")) return;
+  const qi = parseInt(box.getAttribute("data-q"), 10);
+  const oi = parseInt(opt.getAttribute("data-o"), 10);
+  const correct = passages()[currentPassage].q[qi].c;
+  box.classList.add("answered");
+  box.querySelectorAll(".qopt").forEach(function(o, idx){
+    if(idx === correct) o.classList.add("right");
+    else if(idx === oi) o.classList.add("wrong");
   });
 });
 

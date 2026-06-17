@@ -29,6 +29,9 @@ no dependencies, no build step, works offline once loaded.
   Tarantella…), synthesized right in the browser — no files, no copyright
 - **Pizzas** 🍕 — they drift across the Italian side, and finishing a
   session earns a little pizza party
+- **Reading** 📚 — a Read tab with short A1/A2 stories built from the deck
+  vocabulary; tap any word (even a conjugated verb) to hear it and see its
+  meaning, with a translation toggle and quick comprehension questions
 - **What's new panel** 📝 — every update is announced in-app (footer link)
 - Add your own words, search the full list, export/import backups, daily streak
 
