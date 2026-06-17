@@ -179,6 +179,15 @@
     padding:11px 14px;border-radius:4px 14px 14px 4px;text-align:left;
   }
   .hl{color:var(--hl);font-weight:700}
+  /* verb conjugation panel */
+  .conj{margin:14px auto 0;max-width:42ch;text-align:left;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.2);overflow:hidden}
+  .conj summary{cursor:pointer;padding:9px 13px;font-size:13px;font-weight:700;color:var(--mut);list-style:none;user-select:none}
+  .conj summary::-webkit-details-marker{display:none}
+  .conj[open] summary{border-bottom:1px solid var(--line)}
+  .conjgrid{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 10px;padding:11px 13px;align-items:baseline}
+  .conjp{font-size:12.5px;color:var(--dim)}
+  .conjf{font-size:14.5px;font-weight:700}
+  @media(max-width:430px){.conjgrid{grid-template-columns:auto 1fr;gap:6px 8px}}
   .hintrow{text-align:center;font-size:12px;color:var(--dim);min-height:15px}
   .controls{display:flex;gap:10px}
   .controls .bigbtn{margin-top:0}
@@ -668,12 +677,98 @@ function posOf(headword, gloss, code){
 function cardPos(card){ return card.pos || (card.pos = posOf(card.nl, card.en, DECK.code)); }
 function posColor(card){ return POS_META[cardPos(card)].color; }
 
+/* ---------------- verb conjugation (present indicative) ----------------
+   The decks store only the infinitive, so present-tense forms are generated:
+   regular rules + spelling fixes + irregulars tables, audited over every verb
+   in both decks. Italian: -are/-ere/-ire (+isc), reflexives. Dutch: stem rules,
+   separable verbs, schwa/loanword handling. Multiword phrases get no table. */
+const IT_IRREG = {
+  essere:["sono","sei","è","siamo","siete","sono"], avere:["ho","hai","ha","abbiamo","avete","hanno"],
+  fare:["faccio","fai","fa","facciamo","fate","fanno"], andare:["vado","vai","va","andiamo","andate","vanno"],
+  venire:["vengo","vieni","viene","veniamo","venite","vengono"], stare:["sto","stai","sta","stiamo","state","stanno"],
+  dare:["do","dai","dà","diamo","date","danno"], dire:["dico","dici","dice","diciamo","dite","dicono"],
+  potere:["posso","puoi","può","possiamo","potete","possono"], volere:["voglio","vuoi","vuole","vogliamo","volete","vogliono"],
+  dovere:["devo","devi","deve","dobbiamo","dovete","devono"], sapere:["so","sai","sa","sappiamo","sapete","sanno"],
+  piacere:["piaccio","piaci","piace","piacciamo","piacete","piacciono"], bere:["bevo","bevi","beve","beviamo","bevete","bevono"],
+  uscire:["esco","esci","esce","usciamo","uscite","escono"], salire:["salgo","sali","sale","saliamo","salite","salgono"],
+  scegliere:["scelgo","scegli","sceglie","scegliamo","scegliete","scelgono"], tradurre:["traduco","traduci","traduce","traduciamo","traducete","traducono"],
+  proporre:["propongo","proponi","propone","proponiamo","proponete","propongono"], sostenere:["sostengo","sostieni","sostiene","sosteniamo","sostenete","sostengono"],
+  spegnere:["spengo","spegni","spegne","spegniamo","spegnete","spengono"], rimanere:["rimango","rimani","rimane","rimaniamo","rimanete","rimangono"]
+};
+const IT_ISC = new Set(["capire","finire","pulire","suggerire","trasferire","preferire","spedire","costruire","sostituire","unire","punire","colpire","gestire"]);
+const IT_REFL = ["mi","ti","si","ci","vi","si"];
+function itAre(r){ return ["o","i","a","iamo","ate","ano"].map(function(e){
+  if(e[0]==="i"){ if(r.slice(-1)==="i") return r+e.slice(1); if(/[cg]$/.test(r)) return r+"h"+e; } return r+e; }); }
+function itEre(r){ return ["o","i","e","iamo","ete","ono"].map(function(e){return r+e;}); }
+function itIre(r,isc){ return (isc?["isco","isci","isce","iamo","ite","iscono"]:["o","i","e","iamo","ite","ono"]).map(function(e){return r+e;}); }
+function conjugateIT(hw){
+  if(/\s/.test(hw)) return null;
+  var refl=false, inf=hw;
+  if(/rsi$/.test(hw)){ refl=true; inf=hw.replace(/rsi$/,"re"); }
+  var f;
+  if(IT_IRREG[inf]) f=IT_IRREG[inf].slice();
+  else if(/are$/.test(inf)) f=itAre(inf.slice(0,-3));
+  else if(/ere$/.test(inf)) f=itEre(inf.slice(0,-3));
+  else if(/ire$/.test(inf)) f=itIre(inf.slice(0,-3), IT_ISC.has(inf));
+  else return null;
+  return refl ? f.map(function(x,i){return IT_REFL[i]+" "+x;}) : f;
+}
+const NL_IRREG = {
+  zijn:["ben","bent","is","zijn","zijn","zijn"], hebben:["heb","hebt","heeft","hebben","hebben","hebben"],
+  kunnen:["kan","kunt","kan","kunnen","kunnen","kunnen"], mogen:["mag","mag","mag","mogen","mogen","mogen"],
+  willen:["wil","wilt","wil","willen","willen","willen"], zullen:["zal","zult","zal","zullen","zullen","zullen"],
+  gaan:["ga","gaat","gaat","gaan","gaan","gaan"], staan:["sta","staat","staat","staan","staan","staan"],
+  doen:["doe","doet","doet","doen","doen","doen"], zien:["zie","ziet","ziet","zien","zien","zien"],
+  slaan:["sla","slaat","slaat","slaan","slaan","slaan"], komen:["kom","komt","komt","komen","komen","komen"],
+  verstaan:["versta","verstaat","verstaat","verstaan","verstaan","verstaan"], bestaan:["besta","bestaat","bestaat","bestaan","bestaan","bestaan"],
+  voorkomen:["voorkom","voorkomt","voorkomt","voorkomen","voorkomen","voorkomen"], douchen:["douche","doucht","doucht","douchen","douchen","douchen"],
+  recyclen:["recycle","recyclet","recyclet","recyclen","recyclen","recyclen"], appen:["app","appt","appt","appen","appen","appen"]
+};
+const NL_STEM = {studeren:"studeer",repareren:"repareer",organiseren:"organiseer",presenteren:"presenteer",solliciteren:"solliciteer",feliciteren:"feliciteer",trakteren:"trakteer",beoordelen:"beoordeel"};
+const NL_SEP = {opstaan:"op",aankomen:"aan",instappen:"in",uitstappen:"uit",overstappen:"over",schoonmaken:"schoon",opruimen:"op",afwassen:"af",aankleden:"aan",uitleggen:"uit",opzoeken:"op",uitspreken:"uit",opzeggen:"op",overmaken:"over",opnemen:"op",invullen:"in",aanvragen:"aan",inloggen:"in",uitloggen:"uit",terugbellen:"terug",meedoen:"mee",opgeven:"op",doorgaan:"door",ophouden:"op",bijdragen:"bij",meenemen:"mee",langskomen:"langs",opschieten:"op",uitnodigen:"uit",afspreken:"af",kennismaken:"kennis",voorstellen:"voor",opladen:"op",hardlopen:"hard",toevoegen:"toe",uitzoeken:"uit",uitrusten:"uit",uitgeven:"uit",inleveren:"in",inschrijven:"in",aanraden:"aan"};
+const NL_VOW="aeiou";
+function nlVow(c){ return NL_VOW.indexOf(c)>=0; }
+function nlGroups(s){ var n=0,p=false; for(var i=0;i<s.length;i++){var v=nlVow(s[i]); if(v&&!p)n++; p=v;} return n; }
+function nlStem(inf){
+  if(NL_STEM[inf]) return NL_STEM[inf];
+  var b = /en$/.test(inf)?inf.slice(0,-2):(/n$/.test(inf)?inf.slice(0,-1):inf);
+  if(b.length>=2 && b[b.length-1]===b[b.length-2] && !nlVow(b[b.length-1])) b=b.slice(0,-1);
+  else { var n=b.length;
+    var schwa = (/ig$/.test(b)) || (nlGroups(b)>=2 && b[n-2]==="e" && "lrn".indexOf(b[n-1])>=0);
+    if(!schwa && n>=2 && !nlVow(b[n-1]) && nlVow(b[n-2]) && (n<3 || !nlVow(b[n-3]))) b=b.slice(0,n-1)+b[n-2]+b.slice(n-1);
+  }
+  return b.replace(/v$/,"f").replace(/z$/,"s");
+}
+function nlPlusT(s){ return /t$/.test(s)?s:s+"t"; }
+function conjugateNL(hw){
+  if(/\s/.test(hw)) return null;
+  if(NL_SEP[hw]){ var p=NL_SEP[hw], bc=conjugateNL(hw.slice(p.length)); return bc?bc.map(function(f){return f+" "+p;}):null; }
+  if(NL_IRREG[hw]) return NL_IRREG[hw].slice();
+  var s=nlStem(hw); return [s,nlPlusT(s),nlPlusT(s),hw,hw,hw];
+}
+const CONJ_PRON = {IT:["io","tu","lui/lei","noi","voi","loro"], NL:["ik","jij","hij/zij","wij","jullie","zij"]};
+function conjugate(hw, code){ return code==="IT" ? conjugateIT(hw) : conjugateNL(hw); }
+function conjugationHTML(card){
+  if(cardPos(card) !== "verb") return "";
+  var forms = conjugate(card.nl, DECK.code);
+  if(!forms) return "";
+  var pron = CONJ_PRON[DECK.code], col = POS_META.verb.color;
+  var cells = forms.map(function(f,i){
+    return '<span class="conjp">' + pron[i] + '</span><span class="conjf" style="color:' + col + '">' + esc(f) + '</span>';
+  }).join("");
+  return '<details class="conj"><summary>📖 conjugation · present</summary><div class="conjgrid">' + cells + '</div></details>';
+}
+
 /* ---------------- patch notes ----------------
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.7.0";
+const APP_VERSION = "4.8.0";
 const PATCH_NOTES = [
+  {v: "4.8.0", date: "16 June 2026", title: "Verb conjugations 📖", items: [
+    "📖 Verbs now show their present-tense conjugation! On a verb card, tap “conjugation · present” to see all six forms (io/tu/lui… or ik/jij/hij…).",
+    "Reflexives (mi sveglio…), Italian -isc verbs (capisco), and Dutch separable verbs (sta op) and irregulars (ben, heb) are all handled — every verb in both decks was checked by hand."
+  ]},
   {v: "4.7.0", date: "16 June 2026", title: "Colour by word type 🎨", items: [
     "🎨 Words are now coloured by their type — nouns, verbs, adjectives, adverbs, numbers and the rest each get their own colour, on the flashcards, inside the example sentences, and in the word list.",
     "🔵 noun · 🔴 verb · 🟢 adjective · 🟣 adverb · 🟡 number · ⚪ other. A little legend at the top of the word list reminds you which is which."
@@ -1063,8 +1158,9 @@ function faceHTML(card, which){
   const catLabel = esc(card.cat) + (cefr(card.cat) ? ' <span class="cefr">' + cefr(card.cat) + '</span>' : '');
   const pos = cardPos(card), pm = POS_META[pos];
   const posTag = '<span class="postag" style="color:' + pm.color + ';border-color:' + pm.color + '55">' + pm.label + '</span>';
+  const conj = side.dutch ? conjugationHTML(card) : "";
   return '<div class="meta"><span class="metaleft"><span class="cat">' + catLabel + '</span>' + posTag + '</span><span class="dots">' + dotsHTML(box) + '</span></div>' +
-         '<div class="main"><div class="word"><span style="color:' + pm.color + '">' + esc(side.word) + '</span>' + spk + '</div>' + sent + '</div>' +
+         '<div class="main"><div class="word"><span style="color:' + pm.color + '">' + esc(side.word) + '</span>' + spk + '</div>' + sent + conj + '</div>' +
          hint;
 }
 
@@ -1446,7 +1542,8 @@ $("startbtn").addEventListener("click", startSession);
 $("quitbtn").addEventListener("click", quitSession);
 
 $("card").addEventListener("click", function(e){
-  if(e.target.closest("[data-say]")) return; // speaker buttons handle themselves
+  if(e.target.closest("[data-say]")) return;  // speaker buttons handle themselves
+  if(e.target.closest(".conj")) return;       // conjugation toggle: don't flip the card
   flip();
 });
 

@@ -68,6 +68,24 @@ Never mix the two.**
   colour: `fmt(sentence, posColor(card))` passes the colour into the `.hl` span
   (flashcard + word list), so the word matches everywhere. `.sent`'s left
   border still uses the theme accent.
+
+## Verb conjugation (present indicative)
+
+- Decks store only the infinitive, so `conjugate(headword, code)` GENERATES the
+  six present-tense forms; shown on the flashcard's target-language side for
+  verbs via a collapsible `.conj` panel (`conjugationHTML()`), tinted the verb
+  colour. The card-click flip handler ignores clicks inside `.conj`.
+- **Italian** (`conjugateIT`): regular -are/-ere/-ire with spelling fixes
+  (-care/-gare→ -ch/-gh; -ciare/-giare drop i), an `IT_ISC` set for -isc verbs,
+  reflexive pronouns for -rsi, and an `IT_IRREG` table (~21 verbs).
+- **Dutch** (`conjugateNL`): stem rules (undouble consonant, double long vowel,
+  v→f/z→s) with a schwa guard (multisyllabic -el/-er/-en and -ig don't double)
+  and `NL_STEM` overrides for stressed -eren (studeer) + beoordeel; `NL_SEP`
+  splits separable verbs (sta op); `NL_IRREG` covers zijn/hebben/modals,
+  -staan/-komen compounds, and a few loanwords.
+- **Every verb in both decks was audited by hand** (scripts in the v4.8 session).
+  Multiword phrases (avere fame, zorgen voor) return null → no table. If deck
+  verbs change, re-run the audit and patch the IRREG/ISC/SEP/STEM tables.
 - Every target-language sentence wraps the word in `*asterisks*` (rendered as
   an accent-colored highlight; stripped before text-to-speech).
 - No double quotes inside the strings (JS data uses `"`); apostrophes are fine
