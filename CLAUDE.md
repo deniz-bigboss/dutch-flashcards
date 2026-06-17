@@ -76,14 +76,22 @@ Never mix the two.**
   Config via `DECK.readGlobal`. Each: `{lvl,icon,title,text,en,q:[{q,o,c}]}`.
 - "Read" tab → `renderReadList()` (passage cards) and `openPassage()` (reader:
   tappable words, Listen/Translation, comprehension MCQs).
-- Tapping a word calls `showGloss()`: pronounces it and looks it up in
-  `READ_LOOKUP` — a map built lazily from the deck (headword, article-stripped
-  variant) **plus every verb's present-tense forms via `conjugate()`**, so
-  inflected verbs resolve to their infinitive gloss. Lookup is invalidated
-  (`READ_LOOKUP = null`) in `boot()` and after `addWord()`.
-- Passages use mostly deck vocabulary + present tense; if you change decks,
-  unknown words just won't gloss (they still pronounce). To add passages,
-  append objects to the arrays in the deck files (no straight `"` — use « »).
+- Passages are ~200 words each (A1/A2). Tapping a word calls `showGloss()`:
+  pronounces it and looks it up via `lookupWord()`:
+  1. `READ_LOOKUP` — built lazily from the deck (headword + article-stripped
+     variant) **plus every verb's present-tense forms via `conjugate()`**, so
+     inflected verbs resolve to their infinitive gloss.
+  2. fallback `window[DECK.readGloss]` = `READ_GLOSS_NL`/`READ_GLOSS_IT`
+     (appended to the deck files) — a hand-authored map covering everything the
+     deck misses: articles, prep+article contractions, pronouns, plurals,
+     inflected adjectives/verbs, off-deck words, names. **Every word in every
+     passage is covered (verified 100% by /tmp/measure.js).** POS colour is
+     inferred from the gloss text: `the …`=noun, `to …`=verb, else other — so
+     keep that format when adding entries.
+- `READ_LOOKUP` is invalidated (`= null`) in `boot()` and after `addWord()`.
+- To add/extend passages: edit the arrays in the deck files (no straight `"` —
+  use « »), then re-run the measure script and add any new misses to the
+  `READ_GLOSS_*` map so coverage stays 100%.
 
 ## Verb conjugation (present indicative)
 

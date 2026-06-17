@@ -634,13 +634,13 @@
    Card fields keep the historic names nl/nls = target-language word/sentence,
    whatever the deck language actually is (Dutch for Deniz, Italian for Aruna). */
 const DECKS = {
-  nl: {code:"NL", flag:"🇳🇱", name:"Dutch", lang:"nl-NL", voiceRe:/^nl/i, file:"deck-nl.js", global:"RAW_NL", readGlobal:"READ_NL",
+  nl: {code:"NL", flag:"🇳🇱", name:"Dutch", lang:"nl-NL", voiceRe:/^nl/i, file:"deck-nl.js", global:"RAW_NL", readGlobal:"READ_NL", readGloss:"READ_GLOSS_NL",
        greeting:"Klaar om te leren?",
        sub:"1000 essential Dutch words · in context",
        searchPh:"Search Dutch or English…",
        phWord:"de fietsenmaker", phEn:"the bicycle repairman",
        phSent:"Mijn fiets staat bij de *fietsenmaker*.", phEnSent:"My bike is at the bicycle repairman."},
-  it: {code:"IT", flag:"🇮🇹", name:"Italian", lang:"it-IT", voiceRe:/^it/i, file:"deck-it.js", global:"RAW_IT", readGlobal:"READ_IT",
+  it: {code:"IT", flag:"🇮🇹", name:"Italian", lang:"it-IT", voiceRe:/^it/i, file:"deck-it.js", global:"RAW_IT", readGlobal:"READ_IT", readGloss:"READ_GLOSS_IT",
        greeting:"Pronti a imparare?",
        sub:"1000 essential Italian words · in context",
        searchPh:"Search Italian or English…",
@@ -824,8 +824,12 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.9.0";
+const APP_VERSION = "4.10.0";
 const PATCH_NOTES = [
+  {v: "4.10.0", date: "17 June 2026", title: "Longer stories, every word explained 📖", items: [
+    "📖 The reading stories are now much longer (around 200 words each) — proper little texts with more to read.",
+    "👆 And now you can tap absolutely any word — articles, little words, plurals, conjugated verbs — and see its meaning. Nothing is left unexplained."
+  ]},
   {v: "4.9.0", date: "17 June 2026", title: "Reading! 📚", items: [
     "📚 New Read tab! Six short A1/A2 stories built from the words you're learning — a self-intro, a day at the café, your apartment, a trip to the sea, and more (Aruna even gets a story about Pıtırcık 🐶).",
     "👆 Tap any word while reading to hear it and see its meaning + type — even conjugated verbs (tap “studio” and you'll see “to study”).",
@@ -1389,7 +1393,20 @@ function buildReadLookup(){
     }
   }
 }
-function lookupWord(w){ if(!READ_LOOKUP) buildReadLookup(); return READ_LOOKUP.get(normWord(w)) || null; }
+function lookupWord(w){
+  if(!READ_LOOKUP) buildReadLookup();
+  const n = normWord(w);
+  const hit = READ_LOOKUP.get(n);
+  if(hit) return hit;
+  // fall back to the per-language reading glossary (articles, contractions,
+  // pronouns, plurals, inflected forms, off-deck words) so every word glosses.
+  const g = (window[DECK.readGloss] || {})[n];
+  if(g){
+    const pos = /^the /.test(g) ? "noun" : /^to /.test(g) ? "verb" : "other";
+    return {en: g, pos: pos};
+  }
+  return null;
+}
 
 function passages(){ return window[DECK.readGlobal] || []; }
 function renderReadList(){
