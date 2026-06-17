@@ -11,7 +11,7 @@
    are dropped (e.g. alongside a big index.html change). Stale-while-revalidate
    means you don't strictly have to — updates still arrive within one reload —
    but bumping keeps storage tidy. Keep it in step with APP_VERSION. */
-const CACHE_VERSION = "aru-v4.10.1";
+const CACHE_VERSION = "aru-v4.10.2";
 const SHELL = [
   "./",
   "./index.html",

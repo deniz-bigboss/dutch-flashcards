@@ -274,6 +274,7 @@
   .foot{margin-top:28px;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:12px;color:var(--dim);text-align:center}
   .foot a{color:var(--mut);cursor:pointer;text-decoration:underline}
   .foot a:hover{color:var(--txt)}
+  .verline{font-size:11px;color:var(--dim);opacity:.7}
   .toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
     background:var(--txt);color:#11131c;padding:11px 19px;border-radius:99px;
@@ -562,7 +563,8 @@
 
   <footer class="foot">
     <span>space = flip · ← / 1 = not yet · → / 2 = knew it · P = pronounce</span>
-    <span><a id="notesbtn">What's new</a> · <a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
+    <span><a id="notesbtn">What's new</a> · <a id="voicebtn">Check voice 🔊</a> · <a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
+    <span id="verline" class="verline"></span>
     <input type="file" id="importfile" accept="application/json" hidden>
   </footer>
 
@@ -824,8 +826,12 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.10.1";
+const APP_VERSION = "4.10.2";
 const PATCH_NOTES = [
+  {v: "4.10.2", date: "17 June 2026", title: "App updates itself now ♻️", items: [
+    "♻️ The home-screen app now updates itself automatically when there's a new version — no more being stuck on an old version while the website is newer.",
+    "🔊 New “Check voice” link in the footer: tap it to hear a test phrase and see exactly which voice your device is using. The version number is shown there too."
+  ]},
   {v: "4.10.1", date: "17 June 2026", title: "Better pronunciation 🔊", items: [
     "🔊 Fixed the audio sometimes reading words with the wrong accent. The app now reliably uses your device's Dutch (or Italian) voice.",
     "If your phone doesn't have that language's voice installed, the app will tell you once — you can add it in your phone's settings for the best pronunciation."
@@ -1501,8 +1507,17 @@ function deckVoice(){
 let voiceWarned = false;
 function speak(text){
   if(!("speechSynthesis" in window)){ toast("Speech is not supported in this browser"); return; }
-  const u = new SpeechSynthesisUtterance(text);
   const v = deckVoice();
+  // mobile (esp. installed PWAs) can have an empty voice list on the first
+  // call — wait briefly and retry once so we don't fall back to the default.
+  if(!v && !speak._retried){
+    speak._retried = true;
+    try{ speechSynthesis.getVoices(); }catch(e){}
+    setTimeout(function(){ speak(text); }, 220);
+    return;
+  }
+  speak._retried = false;
+  const u = new SpeechSynthesisUtterance(text);
   if(v){
     u.voice = v;
     u.lang = v.lang;
@@ -1516,6 +1531,17 @@ function speak(text){
   u.rate = 0.9;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
+}
+/* diagnostic: tell the user exactly which voice the app sees (use the footer
+   "Check voice" link). Helps tell apart "no Dutch voice on the device" from
+   "running old cached code". */
+function voiceReport(){
+  let list = [];
+  try{ list = speechSynthesis.getVoices() || []; }catch(e){}
+  const v = deckVoice();
+  if(v) toast("✅ Speaking with: " + v.name + " · " + v.lang);
+  else toast("⚠️ No " + DECK.name + " voice found (" + list.length + " voices on device). App v" + APP_VERSION);
+  speak(DECK.code === "NL" ? "Hallo! Dit is de Nederlandse stem." : "Ciao! Questa è la voce italiana.");
 }
 
 /* ---------------- add / delete / backup ---------------- */
@@ -1692,6 +1718,7 @@ async function boot(){
   settings.cats = settings.cats.filter(function(c){ return allCards().some(function(x){ return x.cat === c; }); });
   save(LSK.settings, settings);
   applyDeckUI();
+  $("verline").textContent = "The Aru App · v" + APP_VERSION;
   if(DECK === DECKS.it) initItalianExtras();
   else removeItalianExtras();
   renderStats();
@@ -1841,6 +1868,7 @@ $("importfile").addEventListener("change", function(){
 });
 $("resetbtn").addEventListener("click", resetProgress);
 $("logoutbtn").addEventListener("click", logout);
+$("voicebtn").addEventListener("click", voiceReport);
 
 $("login-btn").addEventListener("click", tryLogin);
 $("login-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryLogin(); });
@@ -2060,8 +2088,20 @@ $("notes").addEventListener("click", function(e){ if(e.target === $("notes")) cl
    browsers. The SW itself lives in sw.js (the one justified break from the
    single-file rule — a service worker cannot be inline). */
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+  // when a new service worker takes over (after a deploy), reload once so the
+  // installed home-screen app actually runs the new code instead of staying
+  // stuck on an old cached version.
+  let _swRefreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){
+    if(_swRefreshing) return;
+    _swRefreshing = true;
+    location.reload();
+  });
   window.addEventListener("load", function(){
-    navigator.serviceWorker.register("sw.js").catch(function(){ /* offline-first is best-effort */ });
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      reg.update();
+      setInterval(function(){ reg.update(); }, 30 * 60 * 1000); // check for updates every 30 min
+    }).catch(function(){ /* offline-first is best-effort */ });
   });
 }
 </script>
