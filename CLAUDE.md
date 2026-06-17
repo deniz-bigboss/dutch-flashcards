@@ -227,6 +227,11 @@ Never mix the two.**
 - Keep it a single file; the owners open it from a phone home screen.
 - UI text in English, learning content in Dutch/Italian; dark theme only.
 - Pronunciation via browser `speechSynthesis`, language from `DECK.lang`.
+  `deckVoice()` re-reads `getVoices()` live (mobile fills it lazily; the old
+  cached-once approach fell back to the device default — a Turkish voice
+  reading Dutch) and prefers an exact `nl-NL`/`it-IT` match. If the device has
+  no voice for the deck language, `speak()` shows a one-time toast to install
+  one (that's the only real cause of a wrong accent left).
 
 ## Version history
 

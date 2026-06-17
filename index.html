@@ -824,8 +824,12 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.10.0";
+const APP_VERSION = "4.10.1";
 const PATCH_NOTES = [
+  {v: "4.10.1", date: "17 June 2026", title: "Better pronunciation 🔊", items: [
+    "🔊 Fixed the audio sometimes reading words with the wrong accent. The app now reliably uses your device's Dutch (or Italian) voice.",
+    "If your phone doesn't have that language's voice installed, the app will tell you once — you can add it in your phone's settings for the best pronunciation."
+  ]},
   {v: "4.10.0", date: "17 June 2026", title: "Longer stories, every word explained 📖", items: [
     "📖 The reading stories are now much longer (around 200 words each) — proper little texts with more to read.",
     "👆 And now you can tap absolutely any word — articles, little words, plurals, conjugated verbs — and see its meaning. Nothing is left unexplained."
@@ -1474,17 +1478,41 @@ function showGloss(word){
 
 /* ---------------- speech ---------------- */
 let voices = [];
-function loadVoices(){ try{ voices = speechSynthesis.getVoices(); }catch(e){} }
+function loadVoices(){ try{ voices = speechSynthesis.getVoices() || []; }catch(e){} }
 if("speechSynthesis" in window){
   loadVoices();
   speechSynthesis.onvoiceschanged = loadVoices;
 }
+/* Pick a voice for the deck's language. Mobile browsers fill the voice list
+   lazily, so we re-read it live each time (the cached copy is often empty at
+   first tap, which made it fall back to the device's default voice — e.g. a
+   Turkish voice reading Dutch with a Turkish accent). Prefer an exact
+   language+region match (nl-NL), then any voice of that language (nl-BE, nl…). */
+function normLang(l){ return (l || "").toLowerCase().replace("_", "-"); }
+function deckVoice(){
+  let list = [];
+  try{ list = speechSynthesis.getVoices() || []; }catch(e){}
+  if(!list.length) list = voices;
+  const want = DECK.lang.toLowerCase(), fam = DECK.code.toLowerCase();
+  return list.find(function(v){ return normLang(v.lang) === want; })
+      || list.find(function(v){ return normLang(v.lang).split("-")[0] === fam; })
+      || null;
+}
+let voiceWarned = false;
 function speak(text){
   if(!("speechSynthesis" in window)){ toast("Speech is not supported in this browser"); return; }
   const u = new SpeechSynthesisUtterance(text);
-  const v = voices.find(function(v){ return DECK.voiceRe.test(v.lang); });
-  if(v) u.voice = v;
-  u.lang = DECK.lang;
+  const v = deckVoice();
+  if(v){
+    u.voice = v;
+    u.lang = v.lang;
+  }else{
+    u.lang = DECK.lang;
+    if(!voiceWarned){
+      voiceWarned = true;
+      toast("No " + DECK.name + " voice on this device — add one in your phone's settings for the right accent 🔊");
+    }
+  }
   u.rate = 0.9;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
