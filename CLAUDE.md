@@ -143,17 +143,36 @@ Never mix the two.**
   specific selection is active, so combined levels actually interleave. Due
   (already-seen) cards always interleave by date regardless.
 
-## Spaced-repetition design (tuned for ~200 cards/day — same for both users)
+## Spaced-repetition design (default ~200 cards/day, now per-user)
 
 - `INTERVAL_DAYS = [0,1,3,7,14,30,60,120]`, boxes 0–7; a miss resets to box 0
   and re-queues the card a few places later in the same session.
 - `MASTER_BOX = 5` (30+ day interval) counts as "known" in the stats.
-- `DAILY_NEW = 30` (hard cap/day), `DAILY_GOAL = 200` (🎯 bar), `SESSION_SIZE = 25`.
-- Rationale (verified by 60-day simulation): ~7–8 lifetime touches per word ×
-  30 new/day peaks at ≈200 scheduled reviews/day; all 1000 words are introduced
-  in ~5 weeks. Weighted practice rounds (weakest cards first) top up light days.
-- If the owner asks for a different pace, change `DAILY_NEW`/`DAILY_GOAL` and
-  re-check the math (peak scheduled load should stay ≈ the goal).
+- `DAILY_NEW`, `DAILY_GOAL`, `SESSION_SIZE` are **`let`, not `const`** — they
+  are recomputed by `applyPace(goal)` from the user's `settings.dailyGoal`
+  (default 200, so untouched profiles keep the original tuning). `applyPace()`
+  is called in `boot()` and when the pace is saved; everything downstream reads
+  the variables, so nothing else needs to know.
+- Rationale (verified by simulation): ~8 lifetime touches per word × 30 new/day
+  peaks at ≈200 scheduled reviews/day; all 1000 words introduced in ~5 weeks.
+  Weighted practice rounds (weakest cards first) top up light days.
+
+## Study pace (user-chosen)
+
+- `newPerDayFor(goal)` maps a daily card goal → new words/day via `PACE_TABLE`
+  (interpolated). The table comes from a simulation of *this* Leitner ladder
+  (script in the v4.12 session) and is deliberately **conservative**: the peak
+  scheduled load stays under the goal, so reviews can't outrun the user. The
+  200→30 row reproduces the original hand-tuned design exactly — keep it if you
+  re-derive the table.
+- `SESSION_SIZE = clamp(goal/8, 10, 30)` (200 → 25, matching the old constant).
+- The picker (`#pace`, `openPace()`) is asked **once**, when the user first
+  leaves a session (`maybeAskPace()` from `quitSession()` *and*
+  `finishSession()`; guarded by `settings.paceSet` so it never nags), and is
+  reachable any time from the footer "Study pace 🎯" link or the "Change" link
+  in the start-panel pace line.
+- Presets in `PACE_PRESETS`; a custom number is clamped to `[PACE_MIN,
+  PACE_MAX]` = 20–600. Stored per user in `settings.dailyGoal`.
 
 ## Login & per-user data
 

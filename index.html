@@ -429,6 +429,32 @@
   .note li{margin-bottom:7px}
   .notesbox .bigbtn{margin-top:4px}
 
+  /* study pace picker */
+  .pacelead{font-size:13.5px;color:var(--mut);line-height:1.55;margin:0 0 14px}
+  .paceopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+    background:rgba(0,0,0,.22);border:1px solid var(--line2);border-radius:14px;
+    padding:11px 13px;margin-bottom:8px;color:var(--txt);font-family:inherit;transition:all .16s}
+  .paceopt:hover{border-color:var(--ac)}
+  .paceopt.on{border-color:transparent;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#0b0d14}
+  .paceicon{font-size:22px;flex-shrink:0}
+  .pacemain{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .pacemain b{font-size:15px}
+  .pacehint{font-size:12px;opacity:.75}
+  .paceopt .pacenum{font-size:17px;font-weight:800;flex-shrink:0}
+  .paceopt .pacenum small{font-size:10.5px;font-weight:700;opacity:.7}
+  .pacecustom{margin-top:14px}
+  .pacecustom label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:6px}
+  .pacerow{display:flex;align-items:center;gap:9px}
+  .pacerow input{flex:1;min-width:0;padding:11px 13px;border-radius:12px;border:1px solid var(--line2);
+    background:rgba(0,0,0,.25);color:var(--txt);font-size:15px;font-family:inherit}
+  .pacerow input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 22%,transparent)}
+  .pacerow span{font-size:13px;color:var(--mut);flex-shrink:0}
+  .pacepreview{font-size:13px;color:var(--mut);line-height:1.6;margin:14px 0 4px;
+    background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+  .pacepreview b{color:var(--hl)}
+  #paceline a{color:var(--mut);cursor:pointer;text-decoration:underline}
+  #paceline a:hover{color:var(--txt)}
+
   .booting{
     position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:12px;
@@ -580,7 +606,7 @@
 
   <footer class="foot">
     <span>space = flip · ← / 1 = not yet · → / 2 = knew it · P = pronounce</span>
-    <span><a id="notesbtn">What's new</a> · <a id="voicebtn">Check voice 🔊</a> · <a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
+    <span><a id="notesbtn">What's new</a> · <a id="pacebtn">Study pace 🎯</a> · <a id="voicebtn">Check voice 🔊</a> · <a id="exportbtn">Export backup</a> · <a id="importbtn">Import backup</a> · <a id="resetbtn">Reset progress</a> · <a id="logoutbtn">Log out</a></span>
     <span id="verline" class="verline"></span>
     <input type="file" id="importfile" accept="application/json" hidden>
   </footer>
@@ -596,6 +622,25 @@
     <h2>What's new ✨</h2>
     <div id="noteslist"></div>
     <button class="bigbtn" id="notesclose">Nice!</button>
+  </div>
+</div>
+
+<!-- study pace picker (asked when leaving a session, changeable from the footer) -->
+<div id="pace" class="notes hidden" role="dialog" aria-label="Study pace">
+  <div class="notesbox">
+    <h2 id="pacetitle">How many cards a day? 🎯</h2>
+    <p class="pacelead" id="pacelead">On average, how much do you plan to study? The app will tune your daily goal and how many new words it introduces so the reviews never pile up.</p>
+    <div id="paceopts"></div>
+    <div class="pacecustom">
+      <label for="pacenum">Or set your own</label>
+      <div class="pacerow">
+        <input id="pacenum" type="number" inputmode="numeric" min="20" max="600" step="10" placeholder="200">
+        <span>cards / day</span>
+      </div>
+    </div>
+    <p class="pacepreview" id="pacepreview"></p>
+    <button class="bigbtn" id="pacesave">Save my pace</button>
+    <button class="linkbtn" id="paceskip">Not now</button>
   </div>
 </div>
 
@@ -846,8 +891,12 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.11.0";
+const APP_VERSION = "4.12.0";
 const PATCH_NOTES = [
+  {v: "4.12.0", date: "17 June 2026", title: "Your own pace 🎯", items: [
+    "🎯 After your first study session the app asks how many cards a day you're planning to do, and tunes itself to your answer — your daily goal, how many new words it introduces, and the session length all follow.",
+    "🧠 Pick fewer cards and it slows down the new words too, so reviews never pile up faster than you can handle. You can change it any time from “Study pace” in the footer."
+  ]},
   {v: "4.11.0", date: "17 June 2026", title: "Hoş geldin Yosun! 🇮🇹", items: [
     "👋 A new Italian profile for Yosun — the same 1000 words, 5 levels and 200-a-day rhythm, with her own separate progress.",
     "✨ The app now writes your own name into the reading stories, so they're really about you."
@@ -1025,9 +1074,38 @@ const DAY = 86400000;
 const INTERVAL_DAYS = [0, 1, 3, 7, 14, 30, 60, 120]; // days until next review, per box
 const MAX_BOX = 7;        // highest box (120-day interval)
 const MASTER_BOX = 5;     // box at which a word counts as "known" (30+ day interval)
-const DAILY_NEW = 30;     // new words introduced per day
-const DAILY_GOAL = 200;   // target card reviews per day
-const SESSION_SIZE = 25;  // cards per bite-sized session
+/* The pace is per user (settings.dailyGoal); these are the defaults and are
+   recomputed by applyPace(). Everything downstream reads these variables. */
+let DAILY_NEW = 30;       // new words introduced per day
+let DAILY_GOAL = 200;     // target card reviews per day
+let SESSION_SIZE = 25;    // cards per bite-sized session
+
+/* How many NEW words/day a given daily card goal can sustain. Derived from a
+   simulation of this exact Leitner ladder (script in the v4.12 session): each
+   new word costs ~8 lifetime touches, so the scheduled review load peaks at
+   roughly goal cards/day. Anchor point 200 -> 30 reproduces the original
+   hand-tuned design. Values are deliberately conservative (peak stays under
+   the goal) and interpolated in between. */
+const PACE_TABLE = [[50,5],[75,8],[100,13],[150,22],[200,30],[250,40],[300,50],[400,62],[500,70]];
+const PACE_MIN = 20, PACE_MAX = 600;
+function newPerDayFor(goal){
+  const t = PACE_TABLE;
+  if(goal <= t[0][0]) return Math.max(2, Math.round(goal / 10));
+  for(let i = 1; i < t.length; i++){
+    if(goal <= t[i][0]){
+      const [g0, n0] = t[i - 1], [g1, n1] = t[i];
+      return Math.round(n0 + (n1 - n0) * (goal - g0) / (g1 - g0));
+    }
+  }
+  return t[t.length - 1][1];
+}
+function clampGoal(g){ return Math.max(PACE_MIN, Math.min(PACE_MAX, Math.round(g || 0))); }
+function applyPace(goal){
+  DAILY_GOAL = clampGoal(goal);
+  DAILY_NEW = newPerDayFor(DAILY_GOAL);
+  SESSION_SIZE = Math.max(10, Math.min(30, Math.round(DAILY_GOAL / 8)));
+}
+function paceWeeks(){ return Math.max(1, Math.round(1000 / DAILY_NEW / 7)); }
 
 function ensureToday(){
   const t = localDate(0);
@@ -1213,6 +1291,7 @@ function finishSession(){
   if(DECK === DECKS.it) pizzaBurst();
   renderStats();
   renderStartInfo();
+  maybeAskPace();
 }
 
 function quitSession(){
@@ -1222,6 +1301,7 @@ function quitSession(){
   $("start").classList.remove("hidden");
   renderStats();
   renderStartInfo();
+  maybeAskPace();
 }
 
 function updateBar(){
@@ -1354,8 +1434,12 @@ function renderStartInfo(){
   $("goalfill").style.width = Math.min(100, Math.round(daily.reviews / DAILY_GOAL * 100)) + "%";
   $("goalbar").classList.toggle("goaldone", daily.reviews >= DAILY_GOAL);
   $("startbtn").textContent = (dn.due.length || newAvail) ? "Start studying" : "Keep practicing";
-  $("paceline").textContent = "Default pace: " + DAILY_NEW + " new words/day + spaced reviews (1·3·7·14·30·60·120 days) ≈ " +
-    DAILY_GOAL + " cards/day once it ramps up. All 1000 words introduced in ~5 weeks.";
+  $("paceline").innerHTML = (settings.dailyGoal ? "Your pace: " : "Default pace: ") +
+    DAILY_NEW + " new words/day + spaced reviews (1·3·7·14·30·60·120 days) ≈ " +
+    DAILY_GOAL + " cards/day once it ramps up. All 1000 words introduced in ~" + paceWeeks() + " weeks. " +
+    '<a id="pacelink">Change</a>';
+  const pl = $("pacelink");
+  if(pl) pl.addEventListener("click", function(){ openPace(false); });
 }
 
 function renderDirSeg(){
@@ -1779,6 +1863,7 @@ async function boot(){
   ensureToday();
   // drop any selected level/category that no longer exists in this deck
   settings.cats = settings.cats.filter(function(c){ return allCards().some(function(x){ return x.cat === c; }); });
+  applyPace(settings.dailyGoal || 200);   // per-user study pace (default = the tuned 200/day)
   save(LSK.settings, settings);
   applyDeckUI();
   $("verline").textContent = "The Aru App · v" + APP_VERSION;
@@ -2141,6 +2226,78 @@ function closeNotes(){
 $("notesbtn").addEventListener("click", openNotes);
 $("notesclose").addEventListener("click", closeNotes);
 $("notes").addEventListener("click", function(e){ if(e.target === $("notes")) closeNotes(); });
+
+/* ---------------- study pace ----------------
+   Asked once when the user first leaves a session, and changeable any time
+   from the footer. Choosing a daily card goal also sets how many NEW words a
+   day are introduced (newPerDayFor), so the scheduled reviews stay near the
+   goal instead of snowballing. */
+const PACE_PRESETS = [
+  {goal: 75,  icon: "🌱", name: "Easy does it", hint: "a few minutes a day"},
+  {goal: 120, icon: "🚶", name: "Steady",       hint: "a relaxed daily habit"},
+  {goal: 200, icon: "🎯", name: "Standard",     hint: "the pace this app was built for"},
+  {goal: 300, icon: "🔥", name: "Intense",      hint: "serious daily study"}
+];
+let paceChoice = 200;
+function paceSummary(goal){
+  const g = clampGoal(goal), n = newPerDayFor(g), w = Math.max(1, Math.round(1000 / n / 7));
+  return "<b>" + g + "</b> cards/day · <b>" + n + "</b> new words/day · all 1000 words in about <b>" + w + "</b> week" + (w === 1 ? "" : "s");
+}
+function renderPace(){
+  $("paceopts").innerHTML = PACE_PRESETS.map(function(p){
+    return '<button class="paceopt' + (paceChoice === p.goal ? " on" : "") + '" data-goal="' + p.goal + '">' +
+      '<span class="paceicon">' + p.icon + '</span>' +
+      '<span class="pacemain"><b>' + p.name + '</b><span class="pacehint">' + esc(p.hint) + '</span></span>' +
+      '<span class="pacenum">' + p.goal + '<small>/day</small></span></button>';
+  }).join("");
+  $("pacepreview").innerHTML = paceSummary(paceChoice);
+}
+function openPace(firstTime){
+  paceChoice = clampGoal(settings.dailyGoal || DAILY_GOAL);
+  $("pacenum").value = PACE_PRESETS.some(function(p){ return p.goal === paceChoice; }) ? "" : paceChoice;
+  $("pacetitle").textContent = firstTime ? "How many cards a day? 🎯" : "Your study pace 🎯";
+  $("paceskip").textContent = firstTime ? "Not now" : "Cancel";
+  renderPace();
+  $("pace").classList.remove("hidden");
+}
+function closePace(){ $("pace").classList.add("hidden"); }
+function savePace(){
+  const custom = parseInt($("pacenum").value, 10);
+  const goal = clampGoal(!isNaN(custom) && custom > 0 ? custom : paceChoice);
+  settings.dailyGoal = goal;
+  settings.paceSet = true;
+  save(LSK.settings, settings);
+  applyPace(goal);
+  closePace();
+  renderStats(); renderStartInfo();
+  toast("Pace set: " + DAILY_GOAL + " cards/day · " + DAILY_NEW + " new words/day 🎯");
+}
+/* ask once, the first time a study session is left */
+function maybeAskPace(){
+  if(settings.paceSet) return;
+  settings.paceSet = true;              // only ever ask automatically once
+  save(LSK.settings, settings);
+  setTimeout(function(){ openPace(true); }, 450);
+}
+$("paceopts").addEventListener("click", function(e){
+  const b = e.target.closest("[data-goal]");
+  if(!b) return;
+  paceChoice = parseInt(b.getAttribute("data-goal"), 10);
+  $("pacenum").value = "";
+  renderPace();
+});
+$("pacenum").addEventListener("input", function(){
+  const v = parseInt($("pacenum").value, 10);
+  if(!isNaN(v) && v > 0){
+    paceChoice = clampGoal(v);
+    document.querySelectorAll("#paceopts .paceopt").forEach(function(b){ b.classList.remove("on"); });
+    $("pacepreview").innerHTML = paceSummary(v);
+  }
+});
+$("pacesave").addEventListener("click", savePace);
+$("paceskip").addEventListener("click", closePace);
+$("pace").addEventListener("click", function(e){ if(e.target === $("pace")) closePace(); });
+$("pacebtn").addEventListener("click", function(){ openPace(false); });
 
 /* ---------------- init ---------------- */
 (function init(){

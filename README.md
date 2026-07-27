@@ -39,7 +39,12 @@ no dependencies, no build step, works offline once loaded.
 
 - Review intervals (Leitner ladder): **1 · 3 · 7 · 14 · 30 · 60 · 120 days**;
   a miss sends the word back to the start
-- **30 new words/day** (hard cap), so all 1000 words are introduced in ~5 weeks
+- **Choose your own pace**: after your first session the app asks how many
+  cards a day you plan to study, then tunes the daily goal, the number of new
+  words it introduces and the session length to match (changeable any time via
+  "Study pace" in the footer). The default is the tuned 200/day below.
+- **30 new words/day** at the default pace (hard cap), so all 1000 words are
+  introduced in ~5 weeks
 - Each word takes ~7–8 touches over its lifetime → scheduled reviews peak
   right around **200 cards/day**; the 🎯 goal bar tracks each day, and
   "Keep practicing" rounds top lighter days up by re-drilling your weakest cards
