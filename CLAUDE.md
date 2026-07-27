@@ -168,13 +168,35 @@ Never mix the two.**
     `localStorage["woordjes.claim.aruna"]` (min 4 chars); afterwards the
     password must match the claim. The claim is per device (no server) — on a
     new device she claims again with the same credentials and imports a backup.
+  - `yosun` (display "Yosun", deck `it`, `person:"Yosun"`, `dog:true`):
+    Deniz's friend. Fixed password (hash in `ACCOUNTS`, same scheme as Deniz).
+    Has a `hello` string greeted on every login (see below).
   - `yes` (display "Yes (test)", deck `it`, password `yes`) and `no` (display
     "No (test)", deck `nl`, password `no`): **TEMPORARY** test accounts to
     preview/verify the Italian (`yes`, incl. Pıtırcık via `dog:true`) and Dutch
     (`no`, no Italian extras) experiences without touching real profiles.
     Remove both `ACCOUNTS` entries (and `woordjes.yes.*`/`woordjes.no.*` keys)
     when testing is done.
-  - Any other name → rejected with a friendly "private app" message.
+  - Any other name → rejected with a friendly "private app" message (keep the
+    name list in that message in step with `ACCOUNTS`).
+
+## Per-person personalization (`person` / `hello`)
+
+- The app's *content* (reading passages, patch notes) was written around the
+  name **Aruna** (`CONTENT_NAME`). `personalize(text)` swaps that for the
+  logged-in account's `person`, so each reader sees their own name; it's a
+  no-op for Aruna. Applied at render time in `renderReadList()`,
+  `openPassage()` (title/text/translation/questions) and `renderNotes()` — the
+  deck files are NOT duplicated per person.
+- `buildReadLookup()` also registers `currentPerson` as a glossable word, so
+  tapping your own name in a passage still shows something.
+- **Any new user-visible content that mentions a person should go through
+  `personalize()`** (or avoid hardcoding a name).
+- `ACCOUNTS[n].hello` (optional) is shown on every login as the `#hellobar`
+  banner: gradient pill, top-centre, auto-hides after 7s, tap to dismiss.
+  Emoji inside it get a wink/blink animation (`.blinkemo`). If the What's-new
+  panel auto-opens on that login the greeting is deferred (`pendingHello`)
+  until the panel closes, so the two never overlap.
 - Storage is namespaced per user: `localStorage` keys
   `woordjes.<user>.{progress,custom,settings,streak,daily}` (keys keep the
   legacy `woordjes.` prefix on purpose — renaming would orphan stored data).

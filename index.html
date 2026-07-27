@@ -283,6 +283,23 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  /* personal greeting on login */
+  .hellobar{
+    position:fixed;left:50%;top:16px;transform:translateX(-50%) translateY(-14px) scale(.96);
+    z-index:55;max-width:92vw;cursor:pointer;
+    display:block;text-align:center;white-space:nowrap;
+    padding:12px 20px;border-radius:99px;
+    font-size:15px;font-weight:800;letter-spacing:.01em;color:#0b0d14;line-height:1.3;
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    box-shadow:0 12px 34px rgba(0,0,0,.5);
+    opacity:0;transition:opacity .35s,transform .35s cubic-bezier(.2,.9,.3,1.3);
+  }
+  @media(max-width:400px){.hellobar{font-size:13.5px;padding:11px 16px}}
+  .hellobar.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  .blinkemo{display:inline-block;animation:blinkemo 1.4s ease-in-out infinite}
+  @keyframes blinkemo{0%,42%,58%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.28) rotate(-8deg)}}
+  @media(prefers-reduced-motion:reduce){.blinkemo{animation:none}}
+
   .login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:40}
   .loginbox{
     background:var(--card);border:1px solid var(--line2);border-radius:26px;
@@ -625,6 +642,9 @@
   <div class="dogtag">Pıtırcık</div>
 </div>
 
+<!-- personal greeting shown on every login (ACCOUNTS[n].hello) -->
+<div class="hellobar hidden" id="hellobar" role="status"></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -826,8 +846,12 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.10.2";
+const APP_VERSION = "4.11.0";
 const PATCH_NOTES = [
+  {v: "4.11.0", date: "17 June 2026", title: "Hoş geldin Yosun! 🇮🇹", items: [
+    "👋 A new Italian profile for Yosun — the same 1000 words, 5 levels and 200-a-day rhythm, with her own separate progress.",
+    "✨ The app now writes your own name into the reading stories, so they're really about you."
+  ]},
   {v: "4.10.2", date: "17 June 2026", title: "App updates itself now ♻️", items: [
     "♻️ The home-screen app now updates itself automatically when there's a new version — no more being stuck on an old version while the website is newer.",
     "🔊 New “Check voice” link in the footer: tap it to hear a test phrase and see exactly which voice your device is using. The version number is shown there too."
@@ -892,15 +916,20 @@ const PATCH_NOTES = [
 /* ---------------- accounts & login ----------------
    Client-side gate: it personalises the app and keeps each user's progress
    under their own storage keys. It is NOT real security — the site is static.
-   Only two names can ever enter: Deniz (fixed password hash below) and Aruna.
-   Aruna's profile is claimable: the first person to log in with the name
-   Aruna sets its password (stored hashed in this browser); from then on the
-   profile belongs to them on this device. */
+   Three real people can enter: Deniz (fixed password hash below), Aruna
+   (claim-on-first-login) and Yosun (fixed password, Italian deck).
+   `person` is the name woven into the app's content — passages, patch notes
+   and greetings are rewritten to it (see personalize()), so Yosun reads her
+   own name where Aruna's appears. `hello` is greeted on every login. */
 const ACCOUNTS = [
   {user: "deniz", display: "Deniz", deck: "nl",
    sha: "c5b6f604c41c22328fbfaa2f2af369682622e3446548730c3cb591bf8514bcb0",
    djb: 4238835318},
-  {user: "aruna", display: "Aruna", deck: "it", claim: true, dog: true},
+  {user: "aruna", display: "Aruna", deck: "it", claim: true, dog: true, person: "Aruna"},
+  {user: "yosun", display: "Yosun", deck: "it", dog: true, person: "Yosun",
+   hello: "İyi çalışmalar Yosun 😉 -Deniz",
+   sha: "d75eb76ca386f936333b69b9de4fc7a88c78b4b76790a068634d7eca054987c5",
+   djb: 2492296734},
   /* TEMP test account (password: the obvious one) so Deniz can preview the
      Italian experience without claiming Aruna's profile. Remove this entry
      (and any localStorage keys starting with woordjes.yes.) when done. */
@@ -937,9 +966,21 @@ async function hashPassword(pw){
 
 /* ---------------- storage (namespaced per user) ---------------- */
 let LSK = null;
+/* The app's content (reading passages, patch notes, greetings) was written
+   around Aruna. `personalize()` rewrites that name to whoever is logged in, so
+   each person reads their own name. No-op for Aruna herself. */
+const CONTENT_NAME = "Aruna";
+let currentPerson = CONTENT_NAME;
+let currentHello = "";
+function personalize(s){
+  if(currentPerson === CONTENT_NAME) return s;
+  return String(s).split(CONTENT_NAME).join(currentPerson);
+}
 function setUser(acc){
   currentUser = acc.user;
   currentDisplay = acc.display;
+  currentPerson = acc.person || acc.display || CONTENT_NAME;
+  currentHello = acc.hello || "";
   DECK = DECKS[acc.deck] || DECKS.nl;
   document.body.classList.toggle("theme-it", acc.deck === "it");
   document.body.classList.toggle("theme-nl", acc.deck !== "it");
@@ -1211,6 +1252,26 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
 }
+/* personal greeting banner (ACCOUNTS[n].hello), shown on every login.
+   Emoji in the message get a little blink/wink animation. */
+const EMOJI_RE = /([\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]+)/gu;
+let helloTimer = null, pendingHello = "";
+function showHello(msg){
+  if(!msg) return;
+  const el = $("hellobar");
+  el.innerHTML = esc(msg).replace(EMOJI_RE, '<span class="blinkemo">$1</span>');
+  el.classList.remove("hidden");
+  void el.offsetWidth;
+  el.classList.add("show");
+  clearTimeout(helloTimer);
+  helloTimer = setTimeout(hideHello, 7000);
+}
+function hideHello(){
+  const el = $("hellobar");
+  el.classList.remove("show");
+  clearTimeout(helloTimer);
+  helloTimer = setTimeout(function(){ el.classList.add("hidden"); }, 400);
+}
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function fmt(s, color){ const st = color ? ' style="color:' + color + '"' : ''; return esc(s).replace(/\*([^*]+)\*/g, '<b class="hl"' + st + '>$1</b>'); }
 function plain(s){ return String(s).replace(/\*/g, ""); }
@@ -1402,6 +1463,8 @@ function buildReadLookup(){
       });
     }
   }
+  // the reader's own name (passages are personalized to it) should gloss too
+  if(currentPerson) put(currentPerson, currentPerson + " (a name)", "other");
 }
 function lookupWord(w){
   if(!READ_LOOKUP) buildReadLookup();
@@ -1428,7 +1491,7 @@ function renderReadList(){
     ps.map(function(p, i){
       return '<button class="readcard" data-p="' + i + '">' +
         '<span class="readicon">' + p.icon + '</span>' +
-        '<span class="readcardmain"><b>' + esc(p.title) + '</b><span class="readprev">' + esc(p.text.slice(0, 52)) + '…</span></span>' +
+        '<span class="readcardmain"><b>' + esc(personalize(p.title)) + '</b><span class="readprev">' + esc(personalize(p.text.slice(0, 52))) + '…</span></span>' +
         '<span class="cefr">' + p.lvl + '</span></button>';
     }).join("");
 }
@@ -1453,16 +1516,16 @@ function openPassage(i){
   currentPassage = i;
   $("readlist").classList.add("hidden");
   $("readview").classList.remove("hidden");
-  $("readtitle").textContent = p.icon + " " + p.title;
+  $("readtitle").textContent = p.icon + " " + personalize(p.title);
   $("readcefr").textContent = p.lvl;
-  tokenizeInto($("readtext"), p.text);
-  $("readen").textContent = p.en;
+  tokenizeInto($("readtext"), personalize(p.text));
+  $("readen").textContent = personalize(p.en);
   $("readen").classList.add("hidden");
   $("readtrans").classList.remove("on");
   $("readgloss").classList.add("hidden");
   $("readq").innerHTML = p.q.map(function(q, qi){
-    return '<div class="qbox" data-q="' + qi + '"><div class="qtext">' + esc(q.q) + '</div>' +
-      q.o.map(function(o, oi){ return '<button class="qopt" data-o="' + oi + '">' + esc(o) + '</button>'; }).join("") +
+    return '<div class="qbox" data-q="' + qi + '"><div class="qtext">' + esc(personalize(q.q)) + '</div>' +
+      q.o.map(function(o, oi){ return '<button class="qopt" data-o="' + oi + '">' + esc(personalize(o)) + '</button>'; }).join("") +
       '</div>';
   }).join("");
   try{ window.scrollTo(0, 0); }catch(e){}
@@ -1641,7 +1704,7 @@ async function tryLogin(){
   if(!u || !p){ loginError("Enter a name and a password."); return; }
   const acc = ACCOUNTS.find(function(a){ return a.user === u; });
   if(!acc){
-    loginError("This is a private app — only Deniz and Aruna can come in. ✋");
+    loginError("This is a private app — only Deniz, Aruna and Yosun can come in. ✋");
     return;
   }
   let ok = false, firstClaim = false;
@@ -1731,10 +1794,16 @@ async function boot(){
   $("autospeak").checked = !!settings.autoSpeak;
   $("login").classList.add("hidden");
   $("appwrap").classList.remove("hidden");
-  if(settings.seenNotes !== APP_VERSION){
+  const showNotes = settings.seenNotes !== APP_VERSION;
+  if(showNotes){
     settings.seenNotes = APP_VERSION;
     save(LSK.settings, settings);
     openNotes();
+  }
+  // greet on every login — but wait for the What's new panel so they don't overlap
+  if(currentHello){
+    if(showNotes) pendingHello = currentHello;
+    else setTimeout(function(){ showHello(currentHello); }, 350);
   }
 }
 
@@ -1869,6 +1938,7 @@ $("importfile").addEventListener("change", function(){
 $("resetbtn").addEventListener("click", resetProgress);
 $("logoutbtn").addEventListener("click", logout);
 $("voicebtn").addEventListener("click", voiceReport);
+$("hellobar").addEventListener("click", hideHello);
 
 $("login-btn").addEventListener("click", tryLogin);
 $("login-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryLogin(); });
@@ -2057,14 +2127,17 @@ function removeItalianExtras(){
 function renderNotes(){
   $("noteslist").innerHTML = PATCH_NOTES.map(function(n, i){
     return '<div class="note">' +
-      '<div class="notehead"><b>v' + n.v + '</b> ' + esc(n.title) +
+      '<div class="notehead"><b>v' + n.v + '</b> ' + esc(personalize(n.title)) +
       (i === 0 ? ' <span class="newtag">NEW</span>' : '') +
       '<span class="notedate">' + esc(n.date) + '</span></div>' +
-      '<ul>' + n.items.map(function(it){ return '<li>' + esc(it) + '</li>'; }).join('') + '</ul></div>';
+      '<ul>' + n.items.map(function(it){ return '<li>' + esc(personalize(it)) + '</li>'; }).join('') + '</ul></div>';
   }).join('');
 }
 function openNotes(){ renderNotes(); $("notes").classList.remove("hidden"); }
-function closeNotes(){ $("notes").classList.add("hidden"); }
+function closeNotes(){
+  $("notes").classList.add("hidden");
+  if(pendingHello){ const m = pendingHello; pendingHello = ""; setTimeout(function(){ showHello(m); }, 250); }
+}
 $("notesbtn").addEventListener("click", openNotes);
 $("notesclose").addEventListener("click", closeNotes);
 $("notes").addEventListener("click", function(e){ if(e.target === $("notes")) closeNotes(); });

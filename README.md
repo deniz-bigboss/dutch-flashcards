@@ -47,12 +47,17 @@ no dependencies, no build step, works offline once loaded.
 
 ## Who can log in
 
-Only two names exist:
+Only three names exist:
 
-- **Deniz** — password fixed in the app (stored as a salted hash).
-- **Aruna** — the profile is **claimed on first login**: the first person to
-  enter the name Aruna chooses the password right there, and from then on the
-  profile belongs to them on that device. Nobody else can get in.
+- **Deniz** — Dutch deck; password fixed in the app (stored as a salted hash).
+- **Aruna** — Italian deck; the profile is **claimed on first login**: the
+  first person to enter the name Aruna chooses the password right there, and
+  from then on the profile belongs to them on that device.
+- **Yosun** — Italian deck, own separate progress, with a personal greeting on
+  every login.
+
+Each profile is personalized: the reading stories are rewritten to use the
+logged-in person's own name.
 
 The login screen is a **client-side gate** on a static site: it keeps each
 user's progress under their own browser storage, but it is **not real
