@@ -243,7 +243,9 @@ Never mix the two.**
 - **Music 🎵**: `MUSIC_TRACKS` + a tiny Web Audio chiptune sequencer (square
   wave, note strings like `"E4:.5 R:1"`). Round button bottom-left, visible
   only with `body.theme-it`; starts on tap (autoplay policies), toast shows
-  the track name. **Only public-domain melodies** (composer dead 70+ years).
+  the track name. Users can disable it entirely: `settings.music` (checkbox
+  `#musicchk` in the study options, row `#musicrow` shown only for `it`);
+  `applyMusicPref()` stops playback and hides the button when off. **Only public-domain melodies** (composer dead 70+ years).
   ⚠️ Never add 'O Sole Mio — an Italian court ruling (Mazzucchi) keeps it in
   copyright until ~2042. Current playlist: Funiculì Funiculà, Santa Lucia,
   Tarantella Napoletana, La donna è mobile, Torna a Surriento.

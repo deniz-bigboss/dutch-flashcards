@@ -538,6 +538,10 @@
         <label></label>
         <label class="chk"><input type="checkbox" id="autospeak"> <span id="autospeaklbl">Auto-pronounce Dutch 🔊</span></label>
       </div>
+      <div class="optrow hidden" id="musicrow">
+        <label></label>
+        <label class="chk"><input type="checkbox" id="musicchk"> <span>Background music 🎵</span></label>
+      </div>
       <button class="bigbtn" id="startbtn">Start studying</button>
       <p class="paceline" id="paceline"></p>
     </div>
@@ -891,8 +895,11 @@ function conjugationHTML(card){
    RULE for future updates: any user-visible change gets an entry here
    (newest first) and a bumped APP_VERSION — the panel auto-opens once per
    user per version, and stays reachable via the footer "What's new" link. */
-const APP_VERSION = "4.12.0";
+const APP_VERSION = "4.13.0";
 const PATCH_NOTES = [
+  {v: "4.13.0", date: "17 June 2026", title: "Music on/off 🔇", items: [
+    "🔇 You can now switch the background music off completely — there's a “Background music 🎵” tick box in the study options. Turning it off stops the music and hides the note button, and the app remembers your choice."
+  ]},
   {v: "4.12.0", date: "17 June 2026", title: "Your own pace 🎯", items: [
     "🎯 After your first study session the app asks how many cards a day you're planning to do, and tunes itself to your answer — your daily goal, how many new words it introduces, and the session length all follow.",
     "🧠 Pick fewer cards and it slows down the new words too, so reviews never pile up faster than you can handle. You can change it any time from “Study pace” in the footer."
@@ -1867,8 +1874,11 @@ async function boot(){
   save(LSK.settings, settings);
   applyDeckUI();
   $("verline").textContent = "The Aru App · v" + APP_VERSION;
-  if(DECK === DECKS.it) initItalianExtras();
+  const isIt = DECK === DECKS.it;
+  if(isIt) initItalianExtras();
   else removeItalianExtras();
+  $("musicrow").classList.toggle("hidden", !isIt);
+  if(isIt) applyMusicPref();
   renderStats();
   renderDirSeg();
   renderDeckChips();
@@ -1971,6 +1981,13 @@ $("deckchips").addEventListener("click", function(e){
 $("autospeak").addEventListener("change", function(){
   settings.autoSpeak = $("autospeak").checked;
   save(LSK.settings, settings);
+});
+
+$("musicchk").addEventListener("change", function(){
+  settings.music = $("musicchk").checked;
+  save(LSK.settings, settings);
+  applyMusicPref();
+  toast(settings.music ? "Music on — tap 🎵 bottom-left to play" : "Music off 🔇");
 });
 
 $("startbtn").addEventListener("click", startSession);
@@ -2164,6 +2181,16 @@ function toggleMusic(){
   $("musicbtn").textContent = "⏸";
   musicTrack = Math.floor(Math.random() * MUSIC_TRACKS.length);
   playNextTrack();
+}
+function musicEnabled(){ return settings.music !== false; }
+/* Music can be switched off entirely (checkbox in the study options): that
+   stops anything playing and hides the floating button. Remembered per user. */
+function applyMusicPref(){
+  const on = musicEnabled();
+  const chk = $("musicchk"); if(chk) chk.checked = on;
+  const btn = $("musicbtn");
+  if(btn) btn.classList.toggle("hidden", !on);
+  if(!on && musicOn) toggleMusic();
 }
 
 /* ---------------- pizzas 🍕 (Italian theme only) ---------------- */
